@@ -1,0 +1,9 @@
+/.classpath
+/.project
+/.gitignore
+/target/**
+/.settings/**
+/.springBeans
+/.factorypath
+/pom.xml.bak
+/*.log*
