@@ -17,6 +17,7 @@ package com.cognizant.outreach.microservices.school.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 
 public interface SchoolService {
@@ -27,5 +28,19 @@ public interface SchoolService {
 	 * @return list of school
 	 */
 	public Optional<List<SchoolVO>> getSchools();
+	
+	/**
+	 * To get the list of class details
+	 * 
+	 * @return list of class
+	 */
+	public Optional<List<ClassVO>> getClassBySchoolId(long schoolId);
+	
+	/**
+	 * To get the list of student and team detail of the class
+	 * 
+	 * @return list of class
+	 */
+	public Optional<ClassVO> getStudentAndTeamDetailsByClassId(long classId);
 
 }

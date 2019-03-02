@@ -1,5 +1,5 @@
 /**
- * ${Student}
+ * ${StudentVO}
  *
  *  2019 Cognizant Technology Solutions. All Rights Reserved.
  *

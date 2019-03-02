@@ -1,5 +1,5 @@
 /**
- * ${Clazz}
+ * ${ClassVO}
  *
  *  2019 Cognizant Technology Solutions. All Rights Reserved.
  *
@@ -27,7 +27,21 @@ public class ClassVO {
 	
 	public String className;
 	
-	public List<SectionVO> sectionList;
+	public String sectionName;
+	
+	public String classAndSectionName;
+	
+	public List<StudentVO> studentList;
+	
+    public List<String> teamList;
+	
+	public String getClassAndSectionName() {
+		return classAndSectionName;
+	}
+
+	public void setClassAndSectionName(String classAndSectionName) {
+		this.classAndSectionName = classAndSectionName;
+	}
 
 	public long getId() {
 		return id;
@@ -45,12 +59,28 @@ public class ClassVO {
 		this.className = className;
 	}
 
-	public List<SectionVO> getSectionList() {
-		return sectionList;
+	public String getSectionName() {
+		return sectionName;
 	}
 
-	public void setSectionList(List<SectionVO> sectionList) {
-		this.sectionList = sectionList;
+	public void setSectionName(String sectionName) {
+		this.sectionName = sectionName;
+	}
+
+	public List<StudentVO> getStudentList() {
+		return studentList;
+	}
+
+	public void setStudentList(List<StudentVO> studentList) {
+		this.studentList = studentList;
+	}
+
+	public List<String> getTeamList() {
+		return teamList;
+	}
+
+	public void setTeamList(List<String> teamList) {
+		this.teamList = teamList;
 	}
 
 }
