@@ -1,5 +1,5 @@
 /**
- * ${SchoolService}
+ * ${Student}
  *
  *  2019 Cognizant Technology Solutions. All Rights Reserved.
  *
@@ -12,20 +12,33 @@
  *  02/Mar/2019            371793        Developed base code structure
  *  ---------------------------------------------------------------------------
  */
-package com.cognizant.outreach.microservices.school.service;
+package com.cognizant.outreach.microservices.school.vo;
 
-import java.util.List;
-import java.util.Optional;
+/**
+ * Holds the value object for Student
+ * 
+ * @author 371793
+ *
+ */
+public class StudentVO {
+	public long id;
+	
+	public String studentName;
 
-import com.cognizant.outreach.microservices.school.vo.SchoolVO;
+	public long getId() {
+		return id;
+	}
 
-public interface SchoolService {
+	public void setId(long id) {
+		this.id = id;
+	}
 
-	/**
-	 * To get the list of school
-	 * 
-	 * @return list of school
-	 */
-	public Optional<List<SchoolVO>> getSchools();
+	public String getStudentName() {
+		return studentName;
+	}
+
+	public void setStudentName(String studentName) {
+		this.studentName = studentName;
+	}
 
 }
