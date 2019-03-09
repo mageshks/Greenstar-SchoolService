@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
+import com.cognizant.outreach.microservices.school.vo.StateVO;
 
 public interface SchoolService {
 
@@ -42,5 +43,12 @@ public interface SchoolService {
 	 * @return list of class
 	 */
 	public Optional<ClassVO> getStudentAndTeamDetailsByClassId(long classId);
+	
+	/**
+	 * To get the list of state and it's district
+	 * 
+	 * @return list of states
+	 */
+	public  List<StateVO>  getStates();
 
 }

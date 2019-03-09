@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cognizant.outreach.microservices.school.service.SchoolService;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
+import com.cognizant.outreach.microservices.school.vo.StateVO;
 
 /**
  * Controller for school module
@@ -81,5 +82,17 @@ public class SchoolController {
 		logger.debug("Retrieved student count ==> {} for classId {}", null == classDetail ? null : classDetail.getStudentList().size(),
 				classVO.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(classDetail);
+	}
+	
+	/**
+	 * To get the list of states
+	 * 
+	 * @return statelist
+	 */
+	@RequestMapping(method = RequestMethod.POST, path = "/getStates")
+	public ResponseEntity<List<StateVO>> getStates() {
+		List<StateVO> states = schoolService.getStates();
+		logger.debug("Retreived state count {}", states.size());
+		return ResponseEntity.status(HttpStatus.OK).body(states);
 	}
 }

@@ -15,19 +15,25 @@
 package com.cognizant.outreach.microservices.school.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cognizant.outreach.entity.ClassDetail;
+import com.cognizant.outreach.entity.IndiaStateDistrict;
 import com.cognizant.outreach.entity.StudentSchoolAssoc;
 import com.cognizant.outreach.microservices.school.dao.ClassRepository;
+import com.cognizant.outreach.microservices.school.dao.IndiaStateDistrictRepository;
 import com.cognizant.outreach.microservices.school.dao.SchoolRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentSchoolAssocRepository;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
+import com.cognizant.outreach.microservices.school.vo.StateVO;
 import com.cognizant.outreach.microservices.school.vo.StudentVO;
 
 /**
@@ -43,6 +49,9 @@ public class SchoolServiceImpl implements SchoolService {
 
 	@Autowired
 	ClassRepository classRepository;
+	
+	@Autowired
+	IndiaStateDistrictRepository indiaStateDistrictRepository;
 	
 	@Autowired
 	StudentSchoolAssocRepository studentSchoolAssocRepository;
@@ -105,4 +114,34 @@ public class SchoolServiceImpl implements SchoolService {
 		}
 		return Optional.of(classVO);
 	}
+
+	@Override
+	public List<StateVO> getStates() {
+		Iterable<IndiaStateDistrict> states = indiaStateDistrictRepository.findAll();
+		Iterator<IndiaStateDistrict> iterator = states.iterator();
+		Map<String, List<String>> stateMap= new HashMap<>();
+		List<StateVO> stateList = new ArrayList<>();
+		
+		while(iterator.hasNext()) {
+			IndiaStateDistrict indiaStateDistrict = iterator.next();
+			String stateName = indiaStateDistrict.getState();
+			String disctict = indiaStateDistrict.getDistrict();
+			if(null == stateMap.get(stateName)) {
+				List<String> disctrictList = new ArrayList<>();
+				disctrictList.add(disctict);
+				stateMap.put(stateName, disctrictList);
+			}else {
+				stateMap.get(stateName).add(disctict);
+			}
+		}
+		
+		for (Map.Entry<String, List<String>> entry : stateMap.entrySet()) {
+			StateVO stateVO = new StateVO();
+			stateVO.setStateName(entry.getKey());
+			stateVO.setDistricts(entry.getValue());
+			stateList.add(stateVO);
+	    }
+		return stateList;
+	}
+	
 }
