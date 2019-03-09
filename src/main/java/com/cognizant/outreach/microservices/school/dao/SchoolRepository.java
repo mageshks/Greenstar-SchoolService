@@ -22,4 +22,8 @@ public interface SchoolRepository extends CrudRepository<School, Long> {
 	public Optional<List<Object[]>> getSchools();
 	
 	public Optional<School> findById(Long id);
+	
+	public Optional<List<School>> findByStateAndDistrict(String state,String district);
+	
+	public Optional<List<School>> findByState(String state);
 }

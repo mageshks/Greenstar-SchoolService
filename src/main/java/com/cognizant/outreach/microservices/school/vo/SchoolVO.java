@@ -28,6 +28,14 @@ public class SchoolVO {
 	
 	public String schoolName;
 	
+	public String district;
+	
+	public String state;
+	
+	public String cityName;
+	
+	public String address;
+	
 	public List<ClassVO> classList;
 
 	public long getId() {
@@ -53,5 +61,39 @@ public class SchoolVO {
 	public void setClassList(List<ClassVO> classList) {
 		this.classList = classList;
 	}
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	
 
 }

@@ -26,12 +26,14 @@ import org.springframework.stereotype.Service;
 
 import com.cognizant.outreach.entity.ClassDetail;
 import com.cognizant.outreach.entity.IndiaStateDistrict;
+import com.cognizant.outreach.entity.School;
 import com.cognizant.outreach.entity.StudentSchoolAssoc;
 import com.cognizant.outreach.microservices.school.dao.ClassRepository;
 import com.cognizant.outreach.microservices.school.dao.IndiaStateDistrictRepository;
 import com.cognizant.outreach.microservices.school.dao.SchoolRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentSchoolAssocRepository;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
+import com.cognizant.outreach.microservices.school.vo.SchoolSearchVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StateVO;
 import com.cognizant.outreach.microservices.school.vo.StudentVO;
@@ -142,6 +144,30 @@ public class SchoolServiceImpl implements SchoolService {
 			stateList.add(stateVO);
 	    }
 		return stateList;
+	}
+
+	@Override
+	public List<SchoolVO> getSchoolsForSearch(SchoolSearchVO schoolSearchVO) {
+		
+		List<School> schools; 
+		if(null == schoolSearchVO.getDistrict()) {
+			schools = schoolRespository.findByState(schoolSearchVO.getStateName()).get();
+		}else {
+			schools =  schoolRespository.findByStateAndDistrict(schoolSearchVO.getStateName(), schoolSearchVO.getDistrict()).get();
+		}
+		List<SchoolVO> schoolVOs = new ArrayList<>();
+		SchoolVO schoolVO;
+		for (School school : schools) {
+			schoolVO = new SchoolVO();
+			schoolVO.setAddress(school.getAddress());
+			schoolVO.setCityName(school.getCityName());
+			schoolVO.setDistrict(school.getDistrict());
+			schoolVO.setSchoolName(school.getSchoolName());
+			schoolVO.setState(school.getState());
+			schoolVO.setId(school.getId());
+			schoolVOs.add(schoolVO);
+		}
+		return schoolVOs;
 	}
 	
 }

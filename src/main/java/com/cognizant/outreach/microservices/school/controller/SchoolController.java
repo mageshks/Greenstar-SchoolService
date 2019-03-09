@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cognizant.outreach.microservices.school.service.SchoolService;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
+import com.cognizant.outreach.microservices.school.vo.SchoolSearchVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StateVO;
 
@@ -94,5 +95,17 @@ public class SchoolController {
 		List<StateVO> states = schoolService.getStates();
 		logger.debug("Retreived state count {}", states.size());
 		return ResponseEntity.status(HttpStatus.OK).body(states);
+	}
+	
+	/**
+	 * To get the list of school for state and district
+	 * 
+	 * @return schoolVO
+	 */
+	@RequestMapping(method = RequestMethod.POST, path = "/school/getSchoolsForSearch")
+	public ResponseEntity<List<SchoolVO>> getSchoolList(@RequestBody SchoolSearchVO schoolSearchVO) {
+		List<SchoolVO> schools = schoolService.getSchoolsForSearch(schoolSearchVO);
+		logger.debug("Retreived school count {}", schools.size());
+		return ResponseEntity.status(HttpStatus.OK).body(schools);
 	}
 }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
+import com.cognizant.outreach.microservices.school.vo.SchoolSearchVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StateVO;
 
@@ -50,5 +51,12 @@ public interface SchoolService {
 	 * @return list of states
 	 */
 	public  List<StateVO>  getStates();
+	
+	/**
+	 * To get the list of schools for the search
+	 * 
+	 * @return list of states
+	 */
+	public List<SchoolVO> getSchoolsForSearch(SchoolSearchVO schoolSearchVO);
 
 }
