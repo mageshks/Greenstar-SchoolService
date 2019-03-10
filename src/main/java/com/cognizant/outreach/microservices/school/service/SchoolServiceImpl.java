@@ -149,24 +149,30 @@ public class SchoolServiceImpl implements SchoolService {
 	@Override
 	public List<SchoolVO> getSchoolsForSearch(SchoolSearchVO schoolSearchVO) {
 		
-		List<School> schools; 
-		if(null == schoolSearchVO.getDistrict()) {
-			schools = schoolRespository.findByState(schoolSearchVO.getStateName()).get();
+		Optional<List<School>> schoolsOptional; 
+		if("--Select District--".equalsIgnoreCase(schoolSearchVO.getDistrict())) {
+			schoolsOptional = schoolRespository.findByState(schoolSearchVO.getStateName());
 		}else {
-			schools =  schoolRespository.findByStateAndDistrict(schoolSearchVO.getStateName(), schoolSearchVO.getDistrict()).get();
+			schoolsOptional =  schoolRespository.findByStateAndDistrict(schoolSearchVO.getStateName(), schoolSearchVO.getDistrict());
 		}
 		List<SchoolVO> schoolVOs = new ArrayList<>();
 		SchoolVO schoolVO;
-		for (School school : schools) {
-			schoolVO = new SchoolVO();
-			schoolVO.setAddress(school.getAddress());
-			schoolVO.setCityName(school.getCityName());
-			schoolVO.setDistrict(school.getDistrict());
-			schoolVO.setSchoolName(school.getSchoolName());
-			schoolVO.setState(school.getState());
-			schoolVO.setId(school.getId());
-			schoolVOs.add(schoolVO);
+		
+		if(schoolsOptional.isPresent()) {
+			List<School> schools = schoolsOptional.get();
+			for (School school : schools) {
+				
+				schoolVO = new SchoolVO();
+				schoolVO.setAddress(school.getAddress());
+				schoolVO.setCityName(school.getCityName());
+				schoolVO.setDistrict(school.getDistrict());
+				schoolVO.setSchoolName(school.getSchoolName());
+				schoolVO.setState(school.getState());
+				schoolVO.setId(school.getId());
+				schoolVOs.add(schoolVO);
+			}
 		}
+		
 		return schoolVOs;
 	}
 	
