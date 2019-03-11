@@ -28,6 +28,8 @@ public class SchoolVO {
 	
 	private String userId;
 	
+	private String action;
+	
 	private String schoolName;
 	
 	private String district;
@@ -44,14 +46,22 @@ public class SchoolVO {
 	
 	private List<WeekendWorkingDayVO> weekendWorkingDays;
 	
-	private List<PerformanceParamVO> performanceParamVOs;
+	private List<PerformanceParamVO> perfParamList;
 	
-	public List<PerformanceParamVO> getPerformanceParamVOs() {
-		return performanceParamVOs;
+	public String getAction() {
+		return action;
 	}
 
-	public void setPerformanceParamVOs(List<PerformanceParamVO> performanceParamVOs) {
-		this.performanceParamVOs = performanceParamVOs;
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	public List<PerformanceParamVO> getPerfParamList() {
+		return perfParamList;
+	}
+
+	public void setPerfParamList(List<PerformanceParamVO> perfParamList) {
+		this.perfParamList = perfParamList;
 	}
 
 	public String getUserId() {
