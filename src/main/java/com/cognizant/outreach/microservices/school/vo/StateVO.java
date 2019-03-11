@@ -4,9 +4,9 @@ import java.util.List;
 
 public class StateVO {
 
-	public String stateName;
+	private String stateName;
 	
-	public List<String> districts;
+	private List<String> districts;
 
 	public String getStateName() {
 		return stateName;

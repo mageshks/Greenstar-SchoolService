@@ -23,17 +23,17 @@ import java.util.List;
  *
  */
 public class ClassVO {
-	public long id;
+	private long id;
 	
-	public String className;
+	private String className;
 	
-	public String sectionName;
+	private String sectionName;
 	
-	public String classAndSectionName;
+	private String classAndSectionName;
 	
-	public List<StudentVO> studentList;
+	private List<StudentVO> studentList;
 	
-    public List<String> teamList;
+	private List<String> teamList;
 	
 	public String getClassAndSectionName() {
 		return classAndSectionName;

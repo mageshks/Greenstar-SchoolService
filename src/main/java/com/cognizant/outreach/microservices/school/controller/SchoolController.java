@@ -14,6 +14,7 @@
  */
 package com.cognizant.outreach.microservices.school.controller;
 
+import java.text.ParseException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -107,5 +108,22 @@ public class SchoolController {
 		List<SchoolVO> schools = schoolService.getSchoolsForSearch(schoolSearchVO);
 		logger.debug("Retreived school count {}", schools.size());
 		return ResponseEntity.status(HttpStatus.OK).body(schools);
+	}
+	
+	/**
+	 * To get the list of school for state and district
+	 * 
+	 * @return schoolVO
+	 */
+	@RequestMapping(method = RequestMethod.POST, path = "/school/createSchool")
+	public ResponseEntity<SchoolVO> getSchoolList(@RequestBody SchoolVO schoolVO) {
+		try {
+			schoolService.saveSchool(schoolVO);
+		} catch (ParseException e) {
+			logger.debug("Exception occured while parsing hte input dates");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+		}
+		logger.debug("School Saved suuccessfully with id {} ==> "+ schoolVO.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(schoolVO);
 	}
 }

@@ -21,9 +21,9 @@ package com.cognizant.outreach.microservices.school.vo;
  *
  */
 public class StudentVO {
-	public long id;
+	private long id;
 	
-	public String studentName;
+	private String studentName;
 
 	public long getId() {
 		return id;

@@ -24,19 +24,59 @@ import java.util.List;
  */
 public class SchoolVO {
 
-	public long id;
+	private long id;
 	
-	public String schoolName;
+	private String userId;
 	
-	public String district;
+	private String schoolName;
 	
-	public String state;
+	private String district;
 	
-	public String cityName;
+	private String state;
 	
-	public String address;
+	private String cityName;
 	
-	public List<ClassVO> classList;
+	private String address;
+	
+	private List<ClassVO> classList;
+	
+	private List<HolidayVO> holidays;
+	
+	private List<WeekendWorkingDayVO> weekendWorkingDays;
+	
+	private List<PerformanceParamVO> performanceParamVOs;
+	
+	public List<PerformanceParamVO> getPerformanceParamVOs() {
+		return performanceParamVOs;
+	}
+
+	public void setPerformanceParamVOs(List<PerformanceParamVO> performanceParamVOs) {
+		this.performanceParamVOs = performanceParamVOs;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public List<HolidayVO> getHolidays() {
+		return holidays;
+	}
+
+	public void setHolidays(List<HolidayVO> holidays) {
+		this.holidays = holidays;
+	}
+
+	public List<WeekendWorkingDayVO> getWeekendWorkingDays() {
+		return weekendWorkingDays;
+	}
+
+	public void setWeekendWorkingDays(List<WeekendWorkingDayVO> weekendWorkingDays) {
+		this.weekendWorkingDays = weekendWorkingDays;
+	}
 
 	public long getId() {
 		return id;
@@ -93,7 +133,4 @@ public class SchoolVO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	
-	
-
 }

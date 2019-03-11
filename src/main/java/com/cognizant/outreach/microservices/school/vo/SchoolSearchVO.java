@@ -23,9 +23,9 @@ package com.cognizant.outreach.microservices.school.vo;
 public class SchoolSearchVO {
 
 
-	public String stateName;
+	private String stateName;
 	
-	public String district;
+	private String district;
 
 	public String getStateName() {
 		return stateName;

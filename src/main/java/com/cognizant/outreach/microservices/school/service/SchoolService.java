@@ -14,6 +14,7 @@
  */
 package com.cognizant.outreach.microservices.school.service;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,5 +59,13 @@ public interface SchoolService {
 	 * @return list of states
 	 */
 	public List<SchoolVO> getSchoolsForSearch(SchoolSearchVO schoolSearchVO);
+	
+	/**
+	 * To save school
+	 * @return 
+	 * @throws ParseException 
+	 * 
+	 */
+	public SchoolVO saveSchool(SchoolVO schoolVO) throws ParseException;
 
 }
