@@ -18,4 +18,6 @@ import com.cognizant.outreach.entity.SchoolHoliday;
 public interface SchoolHolidayRepository extends CrudRepository<SchoolHoliday, Long> {
 	
 	public Optional<List<SchoolHoliday>> findBySchoolId(Long schoolId);
+	
+	public List<Long> deleteBySchoolId(Long schoolId);
 }

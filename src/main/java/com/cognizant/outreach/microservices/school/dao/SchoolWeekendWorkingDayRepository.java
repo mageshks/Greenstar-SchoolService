@@ -18,5 +18,6 @@ import com.cognizant.outreach.entity.SchoolWeekendWorkingDay;
 public interface SchoolWeekendWorkingDayRepository extends CrudRepository<SchoolWeekendWorkingDay, Long> {
 	
 	public Optional<List<SchoolWeekendWorkingDay>> findBySchoolId(Long schoolId);
+	public List<Long> deleteBySchoolId(Long schoolId);
 	
 }

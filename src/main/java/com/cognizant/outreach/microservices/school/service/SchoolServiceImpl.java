@@ -200,7 +200,7 @@ public class SchoolServiceImpl implements SchoolService {
 	@Override
 	@Transactional
 	public SchoolVO saveSchool(SchoolVO schoolVO) throws ParseException {
-		School school = SchoolHelper.populateSchool(schoolVO,null, false);
+		School school = SchoolHelper.populateSchool(schoolVO, null, false);
 		schoolRespository.save(school);
 		schoolVO.setId(school.getId());
 		saveClasses(schoolVO.getUserId(), school, schoolVO.getClassList());
@@ -217,14 +217,15 @@ public class SchoolServiceImpl implements SchoolService {
 	}
 
 	private void saveClass(String userId, School school, ClassVO classVO) {
-		ClassDetail classDetail = SchoolHelper.populateClass(userId, school, classVO, false);
+		ClassDetail classDetail = SchoolHelper.populateClass(userId, school, classVO, null, false);
 		classRepository.save(classDetail);
 		classVO.setId(classDetail.getId());
 	}
 
 	private void savePerfParameters(String userId, School school, List<PerformanceParamVO> performanceParamVOs) {
 		for (PerformanceParamVO performanceParamVO : performanceParamVOs) {
-			MeasurableParam measurableParam = SchoolHelper.populateParam(userId, school, performanceParamVO, false);
+			MeasurableParam measurableParam = SchoolHelper.populateParam(userId, school, null, performanceParamVO,
+					false);
 			measurableParamRepository.save(measurableParam);
 			performanceParamVO.setId(measurableParam.getId());
 		}
@@ -277,12 +278,51 @@ public class SchoolServiceImpl implements SchoolService {
 		return schoolVO;
 	}
 
+	@Transactional
 	@Override
 	public SchoolVO updateSchool(SchoolVO schoolVO) throws ParseException {
 		School school = schoolRespository.findById(schoolVO.getId()).get();
-		SchoolHelper.populateSchool(schoolVO,school, true);
+		SchoolHelper.populateSchool(schoolVO, school, true);
 		schoolRespository.save(school);
+		deleteInsertHolidays(schoolVO, school);
+		deleteInsertWeekendWorkingDays(schoolVO, school);
+		updatePerformanceParam(schoolVO, school);
+		updateClasses(schoolVO, school);
 		return schoolVO;
+	}
+
+	private void updatePerformanceParam(SchoolVO schoolVO, School school) {
+		for (PerformanceParamVO performanceParamVO : schoolVO.getPerfParamList()) {
+			MeasurableParam measurableParam = measurableParamRepository.findById(performanceParamVO.getId()).get();
+			SchoolHelper.populateParam(schoolVO.getUserId(), school, measurableParam, performanceParamVO, true);
+			measurableParamRepository.save(measurableParam);
+		}
+	}
+
+	private void deleteInsertHolidays(SchoolVO schoolVO, School school) throws ParseException {
+		schoolHolidayRepository.deleteBySchoolId(schoolVO.getId());
+		saveHolidays(schoolVO.getUserId(), school, schoolVO.getHolidays());
+	}
+
+	private void deleteInsertWeekendWorkingDays(SchoolVO schoolVO, School school) throws ParseException {
+		weekendWorkingDayRepository.deleteBySchoolId(schoolVO.getId());
+		saveWeekendWorkingDays(schoolVO.getUserId(), school, schoolVO.getWeekendWorkingDays());
+	}
+
+	private void updateClasses(SchoolVO schoolVO, School school) {
+		for (ClassVO classVO : schoolVO.getClassList()) {
+			// Insert new record
+			if (classVO.getId() == 0L) {
+				ClassDetail classDetail = SchoolHelper.populateClass(schoolVO.getUserId(), school, classVO, null,
+						false);
+				classRepository.save(classDetail);
+				classVO.setId(classDetail.getId());
+			} else {
+				ClassDetail classDetail = classRepository.findById(classVO.getId()).get();
+				SchoolHelper.populateClass(schoolVO.getUserId(), school, classVO, classDetail, true);
+				classRepository.save(classDetail);
+			}
+		}
 	}
 
 }

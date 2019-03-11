@@ -57,8 +57,7 @@ public class SchoolHelper {
 		}
 		return performanceParamVOs;
 	}
-	
-	
+
 	public static List<ClassVO> getClassVOList(List<ClassDetail> classes) {
 		ClassVO classVO = null;
 		List<ClassVO> ClassVOs = new ArrayList<>();
@@ -71,7 +70,7 @@ public class SchoolHelper {
 		}
 		return ClassVOs;
 	}
-	
+
 	public static List<HolidayVO> getHolidayVOList(List<SchoolHoliday> holidays) throws ParseException {
 		HolidayVO holidayVO = null;
 		List<HolidayVO> holidayVOs = new ArrayList<>();
@@ -85,9 +84,10 @@ public class SchoolHelper {
 		}
 		return holidayVOs;
 	}
-	
-	public static ClassDetail populateClass(String userId, School school, ClassVO classVO, boolean isUpdate) {
-		ClassDetail classDetail = new ClassDetail();
+
+	public static ClassDetail populateClass(String userId, School school, ClassVO classVO, ClassDetail dbClassDetail,
+			boolean isUpdate) {
+		ClassDetail classDetail = (isUpdate ? dbClassDetail : new ClassDetail());
 		classDetail.setSchool(school);
 		classDetail.setClassName(classVO.getClassName());
 		classDetail.setSection(classVO.getSectionName());
@@ -96,14 +96,13 @@ public class SchoolHelper {
 			updateAuditInfo(userId, classDetail);
 		} else {
 			addAuditInfo(userId, classDetail);
-			classVO.setId(classDetail.getId());
 		}
 		return classDetail;
 	}
-	
-	public static MeasurableParam populateParam(String userId, School school, PerformanceParamVO performanceParamVO,
-			boolean isUpdate) {
-		MeasurableParam measurableParam = new MeasurableParam();
+
+	public static MeasurableParam populateParam(String userId, School school, MeasurableParam dbMeasurableParam,
+			PerformanceParamVO performanceParamVO, boolean isUpdate) {
+		MeasurableParam measurableParam = (isUpdate ? dbMeasurableParam : new MeasurableParam());
 		measurableParam.setParameterTitle(performanceParamVO.getParamTitle());
 		measurableParam.setParameterDesc(performanceParamVO.getParamDesc());
 		measurableParam.setSchool(school);
@@ -115,7 +114,7 @@ public class SchoolHelper {
 		}
 		return measurableParam;
 	}
-	
+
 	public static SchoolWeekendWorkingDay populateWeekendWorkingDay(String userId, School school,
 			WeekendWorkingDayVO weekendWorkingDayVO, boolean isUpdate) throws ParseException {
 		SchoolWeekendWorkingDay schoolWeekendWorkingDay = new SchoolWeekendWorkingDay();
@@ -130,7 +129,7 @@ public class SchoolHelper {
 		}
 		return schoolWeekendWorkingDay;
 	}
-	
+
 	public static SchoolHoliday populateHoliday(String userId, School school, HolidayVO holidayVO, boolean isUpdate)
 			throws ParseException {
 		SchoolHoliday schoolHoliday = new SchoolHoliday();
@@ -147,7 +146,7 @@ public class SchoolHelper {
 		}
 		return schoolHoliday;
 	}
-	
+
 	public static void addAuditInfo(String userId, BaseEntity baseEntity) {
 		Date now = new Date();
 		baseEntity.setCreatedDtm(now);
@@ -156,8 +155,8 @@ public class SchoolHelper {
 		baseEntity.setLastUpdatedUserId(userId);
 	}
 
-	public static School populateSchool(SchoolVO schoolVO,School dbSchool, boolean isUpdate) {
-		School school = (null == dbSchool ? new School() :  dbSchool);
+	public static School populateSchool(SchoolVO schoolVO, School dbSchool, boolean isUpdate) {
+		School school = (isUpdate ? dbSchool : new School());
 		school.setSchoolName(schoolVO.getSchoolName());
 		school.setAddress(schoolVO.getAddress());
 		school.setCityName(schoolVO.getCityName());
@@ -171,14 +170,15 @@ public class SchoolHelper {
 		}
 		return school;
 	}
-	
+
 	public static void updateAuditInfo(String userId, BaseEntity baseEntity) {
 		Date now = new Date();
 		baseEntity.setLastUpdatedDtm(now);
 		baseEntity.setLastUpdatedUserId(userId);
 	}
-	
-	public static List<WeekendWorkingDayVO> getWorkingDayVOList(List<SchoolWeekendWorkingDay> workingDays) throws ParseException {
+
+	public static List<WeekendWorkingDayVO> getWorkingDayVOList(List<SchoolWeekendWorkingDay> workingDays)
+			throws ParseException {
 		WeekendWorkingDayVO weekendWorkingDayVO = null;
 		List<WeekendWorkingDayVO> workingDayVOs = new ArrayList<>();
 		for (SchoolWeekendWorkingDay weekendWorkingDay : workingDays) {
@@ -190,5 +190,4 @@ public class SchoolHelper {
 		}
 		return workingDayVOs;
 	}
-
 }
