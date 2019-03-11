@@ -67,6 +67,14 @@ public interface SchoolService {
 	 * 
 	 */
 	public SchoolVO saveSchool(SchoolVO schoolVO) throws ParseException;
+	
+	/**
+	 * To update school
+	 * @return 
+	 * @throws ParseException 
+	 * 
+	 */
+	public SchoolVO updateSchool(SchoolVO schoolVO) throws ParseException;
 
 	/**
 	 * To get school

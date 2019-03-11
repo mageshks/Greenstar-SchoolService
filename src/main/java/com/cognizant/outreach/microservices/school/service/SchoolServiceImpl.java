@@ -16,7 +16,6 @@ package com.cognizant.outreach.microservices.school.service;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cognizant.outreach.entity.BaseEntity;
 import com.cognizant.outreach.entity.ClassDetail;
 import com.cognizant.outreach.entity.IndiaStateDistrict;
 import com.cognizant.outreach.entity.MeasurableParam;
@@ -51,7 +49,6 @@ import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StateVO;
 import com.cognizant.outreach.microservices.school.vo.StudentVO;
 import com.cognizant.outreach.microservices.school.vo.WeekendWorkingDayVO;
-import com.cognizant.outreach.util.DateUtil;
 
 /**
  * Service to do crud operation on school details
@@ -203,13 +200,7 @@ public class SchoolServiceImpl implements SchoolService {
 	@Override
 	@Transactional
 	public SchoolVO saveSchool(SchoolVO schoolVO) throws ParseException {
-		School school = new School();
-		school.setSchoolName(schoolVO.getSchoolName());
-		school.setAddress(schoolVO.getAddress());
-		school.setCityName(schoolVO.getCityName());
-		school.setDistrict(schoolVO.getDistrict());
-		school.setState(schoolVO.getState());
-		this.addAuditInfo(schoolVO.getUserId(), school);
+		School school = SchoolHelper.populateSchool(schoolVO,null, false);
 		schoolRespository.save(school);
 		schoolVO.setId(school.getId());
 		saveClasses(schoolVO.getUserId(), school, schoolVO.getClassList());
@@ -221,23 +212,19 @@ public class SchoolServiceImpl implements SchoolService {
 
 	private void saveClasses(String userId, School school, List<ClassVO> classses) {
 		for (ClassVO classVO : classses) {
-			ClassDetail classDetail = new ClassDetail();
-			classDetail.setSchool(school);
-			classDetail.setClassName(classVO.getClassName());
-			classDetail.setSection(classVO.getSectionName());
-			addAuditInfo(userId, classDetail);
-			classRepository.save(classDetail);
-			classVO.setId(classDetail.getId());
+			this.saveClass(userId, school, classVO);
 		}
+	}
+
+	private void saveClass(String userId, School school, ClassVO classVO) {
+		ClassDetail classDetail = SchoolHelper.populateClass(userId, school, classVO, false);
+		classRepository.save(classDetail);
+		classVO.setId(classDetail.getId());
 	}
 
 	private void savePerfParameters(String userId, School school, List<PerformanceParamVO> performanceParamVOs) {
 		for (PerformanceParamVO performanceParamVO : performanceParamVOs) {
-			MeasurableParam measurableParam = new MeasurableParam();
-			measurableParam.setParameterTitle(performanceParamVO.getParamTitle());
-			measurableParam.setParameterDesc(performanceParamVO.getParamDesc());
-			measurableParam.setSchool(school);
-			addAuditInfo(userId, measurableParam);
+			MeasurableParam measurableParam = SchoolHelper.populateParam(userId, school, performanceParamVO, false);
 			measurableParamRepository.save(measurableParam);
 			performanceParamVO.setId(measurableParam.getId());
 		}
@@ -245,12 +232,7 @@ public class SchoolServiceImpl implements SchoolService {
 
 	private void saveHolidays(String userId, School school, List<HolidayVO> holidayVOs) throws ParseException {
 		for (HolidayVO holidayVO : holidayVOs) {
-			SchoolHoliday schoolHoliday = new SchoolHoliday();
-			schoolHoliday.setFromDate(DateUtil.getDatabaseDate(holidayVO.getFromDate()));
-			schoolHoliday.setToDate(DateUtil.getDatabaseDate(holidayVO.getToDate()));
-			schoolHoliday.setDescription(holidayVO.getDescription());
-			schoolHoliday.setSchool(school);
-			addAuditInfo(userId, schoolHoliday);
+			SchoolHoliday schoolHoliday = SchoolHelper.populateHoliday(userId, school, holidayVO, false);
 			schoolHolidayRepository.save(schoolHoliday);
 			holidayVO.setId(schoolHoliday.getId());
 		}
@@ -259,28 +241,11 @@ public class SchoolServiceImpl implements SchoolService {
 	private void saveWeekendWorkingDays(String userId, School school, List<WeekendWorkingDayVO> weekendWorkingDayVOs)
 			throws ParseException {
 		for (WeekendWorkingDayVO weekendWorkingDayVO : weekendWorkingDayVOs) {
-			SchoolWeekendWorkingDay schoolWeekendWorkingDay = new SchoolWeekendWorkingDay();
-			schoolWeekendWorkingDay.setSchool(school);
-			schoolWeekendWorkingDay.setWorkingDate(DateUtil.getDatabaseDate(weekendWorkingDayVO.getWorkingDate()));
-			schoolWeekendWorkingDay.setReason(weekendWorkingDayVO.getReason());
-			addAuditInfo(userId, schoolWeekendWorkingDay);
+			SchoolWeekendWorkingDay schoolWeekendWorkingDay = SchoolHelper.populateWeekendWorkingDay(userId, school,
+					weekendWorkingDayVO, false);
 			weekendWorkingDayRepository.save(schoolWeekendWorkingDay);
 			weekendWorkingDayVO.setId(schoolWeekendWorkingDay.getId());
 		}
-	}
-
-	private void addAuditInfo(String userId, BaseEntity baseEntity) {
-		Date now = new Date();
-		baseEntity.setCreatedDtm(now);
-		baseEntity.setCreatedUserId(userId);
-		baseEntity.setLastUpdatedDtm(now);
-		baseEntity.setLastUpdatedUserId(userId);
-	}
-
-	private void updateAuditInfo(String userId, BaseEntity baseEntity) {
-		Date now = new Date();
-		baseEntity.setLastUpdatedDtm(now);
-		baseEntity.setLastUpdatedUserId(userId);
 	}
 
 	@Override
@@ -295,21 +260,28 @@ public class SchoolServiceImpl implements SchoolService {
 			}
 			Optional<List<MeasurableParam>> measurableParams = measurableParamRepository
 					.findBySchoolId(school.get().getId());
-			if(measurableParams.isPresent()) {
+			if (measurableParams.isPresent()) {
 				schoolVO.setPerfParamList(SchoolHelper.getPerformanceParamVOList(measurableParams.get()));
 			}
-			Optional<List<SchoolHoliday>> SchoolHoliday = schoolHolidayRepository
-					.findBySchoolId(school.get().getId());
-			if(SchoolHoliday.isPresent()) {
+			Optional<List<SchoolHoliday>> SchoolHoliday = schoolHolidayRepository.findBySchoolId(school.get().getId());
+			if (SchoolHoliday.isPresent()) {
 				schoolVO.setHolidays(SchoolHelper.getHolidayVOList((SchoolHoliday.get())));
 			}
-			
-			Optional<List<SchoolWeekendWorkingDay>>  schoolWeekendWorkingDays= weekendWorkingDayRepository
+
+			Optional<List<SchoolWeekendWorkingDay>> schoolWeekendWorkingDays = weekendWorkingDayRepository
 					.findBySchoolId(school.get().getId());
-			if(schoolWeekendWorkingDays.isPresent()) {
+			if (schoolWeekendWorkingDays.isPresent()) {
 				schoolVO.setWeekendWorkingDays(SchoolHelper.getWorkingDayVOList((schoolWeekendWorkingDays.get())));
 			}
 		}
+		return schoolVO;
+	}
+
+	@Override
+	public SchoolVO updateSchool(SchoolVO schoolVO) throws ParseException {
+		School school = schoolRespository.findById(schoolVO.getId()).get();
+		SchoolHelper.populateSchool(schoolVO,school, true);
+		schoolRespository.save(school);
 		return schoolVO;
 	}
 

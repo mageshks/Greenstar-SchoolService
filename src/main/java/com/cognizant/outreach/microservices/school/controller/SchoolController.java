@@ -115,15 +115,22 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/createSchool")
-	public ResponseEntity<SchoolVO> saveSchool(@RequestBody SchoolVO schoolVO) {
+	@RequestMapping(method = RequestMethod.POST, path = "/school/submitschool")
+	public ResponseEntity<SchoolVO> submitSchool(@RequestBody SchoolVO schoolVO) {
 		try {
-			schoolService.saveSchool(schoolVO);
+			if(schoolVO.getAction().equalsIgnoreCase("create")) {
+				schoolService.saveSchool(schoolVO);
+				logger.debug("School Saved successfully with id {} ==> " + schoolVO.getId());
+			}
+			if(schoolVO.getAction().equalsIgnoreCase("edit")) {
+				schoolService.updateSchool(schoolVO);
+				logger.debug("School Updated successfully with id {} ==> " + schoolVO.getId());
+			}
 		} catch (ParseException e) {
 			logger.debug("Exception occured while parsing the input dates from ui",e);
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
-		logger.debug("School Saved suuccessfully with id {} ==> " + schoolVO.getId());
+	
 		return ResponseEntity.status(HttpStatus.OK).body(schoolVO);
 	}
 

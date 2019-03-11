@@ -16,8 +16,10 @@ package com.cognizant.outreach.microservices.school.helper;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import com.cognizant.outreach.entity.BaseEntity;
 import com.cognizant.outreach.entity.ClassDetail;
 import com.cognizant.outreach.entity.MeasurableParam;
 import com.cognizant.outreach.entity.School;
@@ -82,6 +84,98 @@ public class SchoolHelper {
 			holidayVOs.add(holidayVO);
 		}
 		return holidayVOs;
+	}
+	
+	public static ClassDetail populateClass(String userId, School school, ClassVO classVO, boolean isUpdate) {
+		ClassDetail classDetail = new ClassDetail();
+		classDetail.setSchool(school);
+		classDetail.setClassName(classVO.getClassName());
+		classDetail.setSection(classVO.getSectionName());
+		if (isUpdate) {
+			classDetail.setId(classVO.getId());
+			updateAuditInfo(userId, classDetail);
+		} else {
+			addAuditInfo(userId, classDetail);
+			classVO.setId(classDetail.getId());
+		}
+		return classDetail;
+	}
+	
+	public static MeasurableParam populateParam(String userId, School school, PerformanceParamVO performanceParamVO,
+			boolean isUpdate) {
+		MeasurableParam measurableParam = new MeasurableParam();
+		measurableParam.setParameterTitle(performanceParamVO.getParamTitle());
+		measurableParam.setParameterDesc(performanceParamVO.getParamDesc());
+		measurableParam.setSchool(school);
+		if (isUpdate) {
+			measurableParam.setId(performanceParamVO.getId());
+			SchoolHelper.updateAuditInfo(userId, measurableParam);
+		} else {
+			SchoolHelper.addAuditInfo(userId, measurableParam);
+		}
+		return measurableParam;
+	}
+	
+	public static SchoolWeekendWorkingDay populateWeekendWorkingDay(String userId, School school,
+			WeekendWorkingDayVO weekendWorkingDayVO, boolean isUpdate) throws ParseException {
+		SchoolWeekendWorkingDay schoolWeekendWorkingDay = new SchoolWeekendWorkingDay();
+		schoolWeekendWorkingDay.setSchool(school);
+		schoolWeekendWorkingDay.setWorkingDate(DateUtil.getDatabaseDate(weekendWorkingDayVO.getWorkingDate()));
+		schoolWeekendWorkingDay.setReason(weekendWorkingDayVO.getReason());
+		if (isUpdate) {
+			schoolWeekendWorkingDay.setId(weekendWorkingDayVO.getId());
+			SchoolHelper.updateAuditInfo(userId, schoolWeekendWorkingDay);
+		} else {
+			SchoolHelper.addAuditInfo(userId, schoolWeekendWorkingDay);
+		}
+		return schoolWeekendWorkingDay;
+	}
+	
+	public static SchoolHoliday populateHoliday(String userId, School school, HolidayVO holidayVO, boolean isUpdate)
+			throws ParseException {
+		SchoolHoliday schoolHoliday = new SchoolHoliday();
+		schoolHoliday.setFromDate(DateUtil.getDatabaseDate(holidayVO.getFromDate()));
+		schoolHoliday.setToDate(DateUtil.getDatabaseDate(holidayVO.getToDate()));
+		schoolHoliday.setDescription(holidayVO.getDescription());
+		schoolHoliday.setSchool(school);
+
+		if (isUpdate) {
+			schoolHoliday.setId(holidayVO.getId());
+			SchoolHelper.updateAuditInfo(userId, schoolHoliday);
+		} else {
+			SchoolHelper.addAuditInfo(userId, schoolHoliday);
+		}
+		return schoolHoliday;
+	}
+	
+	public static void addAuditInfo(String userId, BaseEntity baseEntity) {
+		Date now = new Date();
+		baseEntity.setCreatedDtm(now);
+		baseEntity.setCreatedUserId(userId);
+		baseEntity.setLastUpdatedDtm(now);
+		baseEntity.setLastUpdatedUserId(userId);
+	}
+
+	public static School populateSchool(SchoolVO schoolVO,School dbSchool, boolean isUpdate) {
+		School school = (null == dbSchool ? new School() :  dbSchool);
+		school.setSchoolName(schoolVO.getSchoolName());
+		school.setAddress(schoolVO.getAddress());
+		school.setCityName(schoolVO.getCityName());
+		school.setDistrict(schoolVO.getDistrict());
+		school.setState(schoolVO.getState());
+		if (isUpdate) {
+			school.setId(schoolVO.getId());
+			SchoolHelper.updateAuditInfo(schoolVO.getUserId(), school);
+		} else {
+			SchoolHelper.addAuditInfo(schoolVO.getUserId(), school);
+		}
+		return school;
+	}
+	
+	public static void updateAuditInfo(String userId, BaseEntity baseEntity) {
+		Date now = new Date();
+		baseEntity.setLastUpdatedDtm(now);
+		baseEntity.setLastUpdatedUserId(userId);
 	}
 	
 	public static List<WeekendWorkingDayVO> getWorkingDayVOList(List<SchoolWeekendWorkingDay> workingDays) throws ParseException {
