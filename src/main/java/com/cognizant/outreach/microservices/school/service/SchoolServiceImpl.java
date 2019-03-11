@@ -309,7 +309,6 @@ public class SchoolServiceImpl implements SchoolService {
 			if(schoolWeekendWorkingDays.isPresent()) {
 				schoolVO.setWeekendWorkingDays(SchoolHelper.getWorkingDayVOList((schoolWeekendWorkingDays.get())));
 			}
-
 		}
 		return schoolVO;
 	}

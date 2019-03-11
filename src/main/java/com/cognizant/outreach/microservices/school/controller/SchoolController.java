@@ -132,16 +132,16 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/schooldetail")
-	public ResponseEntity<SchoolVO> getSchoolList(@RequestBody SchoolVO schoolVO) {
-		SchoolVO schoolVO2;
+	@RequestMapping(method = RequestMethod.POST, path = "/school/getschooldetail")
+	public ResponseEntity<SchoolVO> getSchoolList(@RequestBody long schoolId) {
+		SchoolVO schoolVO;
 		try {
-			schoolVO2 = schoolService.getSchoolDetail(schoolVO.getId());
+			schoolVO = schoolService.getSchoolDetail(schoolId);
 		} catch (ParseException e) {
-			logger.debug("Exception occured while retrieving the school data for id {} {}",schoolVO.getId(),e);
+			logger.debug("Exception occured while retrieving the school data for id {} {}",schoolId,e);
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
-		logger.debug("School retrieved with class count {} ==> " + schoolVO2.getClassList().size());
-		return ResponseEntity.status(HttpStatus.OK).body(schoolVO2);
+		logger.debug("School retrieved with class count {} ==> " + schoolVO.getClassList().size());
+		return ResponseEntity.status(HttpStatus.OK).body(schoolVO);
 	}
 }
