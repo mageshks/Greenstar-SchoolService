@@ -130,6 +130,10 @@ public class SchoolServiceImpl implements SchoolService {
 				}
 				StudentVO studentVO = new StudentVO();
 				studentVO.setId(schoolAssoc.getStudent().getId());
+				studentVO.setAssociationId(schoolAssoc.getId());
+				studentVO.setClassId(schoolAssoc.getClazz().getId());
+				studentVO.setTeamName(schoolAssoc.getTeamName());
+				studentVO.setRollId(schoolAssoc.getRollId());
 				studentVO.setStudentName(schoolAssoc.getStudent().getStudentName());
 				studentVOs.add(studentVO);
 			}
