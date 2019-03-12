@@ -21,11 +21,30 @@ package com.cognizant.outreach.microservices.school.vo;
  *
  */
 public class TeamNameCountVO {
-	
-	
+
 	private String teamName;
-	
+
 	private int studentCount;
+
+	private long classId;
+
+	private String classSectionName;
+
+	public long getClassId() {
+		return classId;
+	}
+
+	public void setClassId(long classId) {
+		this.classId = classId;
+	}
+
+	public String getClassSectionName() {
+		return classSectionName;
+	}
+
+	public void setClassSectionName(String classSectionName) {
+		this.classSectionName = classSectionName;
+	}
 
 	public String getTeamName() {
 		return teamName;

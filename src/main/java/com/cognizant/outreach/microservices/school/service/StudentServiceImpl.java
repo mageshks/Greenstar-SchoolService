@@ -66,6 +66,8 @@ public class StudentServiceImpl implements StudentService {
 				TeamNameCountVO teamNameCountVO = new TeamNameCountVO();
 				teamNameCountVO.setTeamName((String) dbRow[0]);
 				teamNameCountVO.setStudentCount(((Long) dbRow[1]).intValue());
+				teamNameCountVO.setClassId((Long) dbRow[2]);
+				teamNameCountVO.setClassSectionName((String) dbRow[3]+"-"+(String) dbRow[4]);
 				teamNameCountVOs.add(teamNameCountVO);
 			}
 		}
