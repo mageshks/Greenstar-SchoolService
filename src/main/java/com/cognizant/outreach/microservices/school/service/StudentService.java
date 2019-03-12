@@ -14,9 +14,14 @@
  */
 package com.cognizant.outreach.microservices.school.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
+import com.cognizant.outreach.microservices.school.vo.StudentSearchVO;
 import com.cognizant.outreach.microservices.school.vo.TeamNameCountVO;
 
 public interface StudentService {
@@ -35,4 +40,25 @@ public interface StudentService {
 	 * @return ClassVO with updated id informations 
 	 */
 	public ClassVO saveStudents(ClassVO classVO);
+
+
+	/**
+	 * To download the excel template
+	 * 
+	 * 
+	 * @param searchVO
+	 * @return
+	 * @throws IOException 
+	 */
+	public byte[] downloadTemplate(StudentSearchVO searchVO) throws IOException;
+
+
+	/**
+	 * Upload student data
+	 * 
+	 * @param file
+	 * @param userId
+	 * @return
+	 */
+	public ResponseEntity<ClassVO> uploadStudentData(MultipartFile file, String userId);
 }

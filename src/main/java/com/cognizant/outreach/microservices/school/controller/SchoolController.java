@@ -14,6 +14,7 @@
  */
 package com.cognizant.outreach.microservices.school.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -23,10 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cognizant.outreach.microservices.school.service.SchoolService;
 import com.cognizant.outreach.microservices.school.service.StudentService;
@@ -34,6 +38,7 @@ import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolSearchVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StateVO;
+import com.cognizant.outreach.microservices.school.vo.StudentSearchVO;
 
 /**
  * Controller for school module
@@ -171,5 +176,35 @@ public class SchoolController {
 		classVO.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
 		logger.debug("Student details updated. student count {} ==> " + classVO.getStudentList().size());
 		return ResponseEntity.status(HttpStatus.OK).body(classVO);
+	}
+	
+	/**
+	 * Method to download the bulk upload template excel file format.
+	 * 
+	 * @param StudentSearchVO
+	 * @return excel byte array
+	 * @throws IOException
+	 */
+	@PostMapping("/school/student/downloadtemplate")
+	public byte[] downloadTemplate(@RequestBody StudentSearchVO searchVO) throws IOException {
+		return studentService.downloadTemplate(searchVO);
+	}
+	
+	
+	/**
+	 * Method to upload the bulk upload student data file.
+	 * 
+	 * @param file
+	 * @param userId
+	 * @return
+	 * @throws IOException
+	 */
+	@PostMapping("/school/student/uploadbulkdata")
+	public ResponseEntity<String> bulkUploadStudentData(@RequestParam("file") MultipartFile file, 
+			@RequestParam("userId") String userId,
+			@RequestParam("schoolId") String schoolId) throws IOException {
+		 studentService.uploadStudentData(file, userId);
+		
+		return ResponseEntity.status(HttpStatus.OK).body("");
 	}
 }
