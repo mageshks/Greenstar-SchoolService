@@ -22,4 +22,9 @@ public interface StudentSchoolAssocRepository extends CrudRepository<StudentScho
 	
 	@Query("FROM StudentSchoolAssoc sa where sa.clazz.id= :classId")
 	public Optional<List<StudentSchoolAssoc>> findClassDetailByClassId(@Param(value = "classId") Long classId);
+	
+	
+	@Query("select sa.teamName,COUNT(sa.teamName) FROM StudentSchoolAssoc sa WHERE sa.clazz.school.id=:SCHOOL_ID"
+			+ " GROUP BY sa.teamName ORDER BY sa.clazz.id asc")
+	public Optional<List<Object[]>> listTeamName(@Param("SCHOOL_ID") long schoolId);
 }

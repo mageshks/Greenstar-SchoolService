@@ -40,6 +40,8 @@ public class SchoolVO {
 	
 	private String address;
 	
+	private List<TeamNameCountVO> schoolTeamList;
+	
 	private List<ClassVO> classList;
 	
 	private List<HolidayVO> holidays;
@@ -50,6 +52,14 @@ public class SchoolVO {
 	
 	public String getAction() {
 		return action;
+	}
+
+	public List<TeamNameCountVO> getSchoolTeamList() {
+		return schoolTeamList;
+	}
+
+	public void setSchoolTeamList(List<TeamNameCountVO> schoolTeamList) {
+		this.schoolTeamList = schoolTeamList;
 	}
 
 	public void setAction(String action) {

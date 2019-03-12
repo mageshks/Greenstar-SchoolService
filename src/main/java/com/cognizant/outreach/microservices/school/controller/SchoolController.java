@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cognizant.outreach.microservices.school.service.SchoolService;
+import com.cognizant.outreach.microservices.school.service.StudentService;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolSearchVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
@@ -45,6 +46,9 @@ public class SchoolController {
 
 	@Autowired
 	SchoolService schoolService;
+	
+	@Autowired
+	StudentService studentService;
 
 	protected Logger logger = LoggerFactory.getLogger(SchoolController.class);
 
@@ -81,6 +85,9 @@ public class SchoolController {
 	@RequestMapping(method = RequestMethod.POST, path = "/school/getClassDetail")
 	public ResponseEntity<ClassVO> getClassDetail(@RequestBody ClassVO classVO) {
 		ClassVO classDetail = schoolService.getStudentAndTeamDetailsByClassId(classVO.getId()).get();
+		if(classVO.getSchoolId() != 0L) {
+			classDetail.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
+		}
 		logger.debug("Retrieved student count ==> {} for classId {}",
 				null == classDetail ? null : classDetail.getStudentList().size(), classVO.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(classDetail);

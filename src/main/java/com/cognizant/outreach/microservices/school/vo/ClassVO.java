@@ -35,6 +35,36 @@ public class ClassVO {
 	
 	private List<String> teamList;
 	
+	private long schoolId;
+	
+	private String teamName;
+	
+	private List<TeamNameCountVO> schoolTeamList;
+	
+	public List<TeamNameCountVO> getSchoolTeamList() {
+		return schoolTeamList;
+	}
+
+	public void setSchoolTeamList(List<TeamNameCountVO> schoolTeamList) {
+		this.schoolTeamList = schoolTeamList;
+	}
+
+	public long getSchoolId() {
+		return schoolId;
+	}
+
+	public void setSchoolId(long schoolId) {
+		this.schoolId = schoolId;
+	}
+
+	public String getTeamName() {
+		return teamName;
+	}
+
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
+	}
+
 	public String getClassAndSectionName() {
 		return classAndSectionName;
 	}
