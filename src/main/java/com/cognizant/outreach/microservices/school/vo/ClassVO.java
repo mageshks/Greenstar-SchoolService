@@ -29,6 +29,8 @@ public class ClassVO {
 	
 	private String sectionName;
 	
+	private String userId;
+	
 	private String classAndSectionName;
 	
 	private List<StudentVO> studentList;
@@ -41,6 +43,14 @@ public class ClassVO {
 	
 	private List<TeamNameCountVO> schoolTeamList;
 	
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 	public List<TeamNameCountVO> getSchoolTeamList() {
 		return schoolTeamList;
 	}

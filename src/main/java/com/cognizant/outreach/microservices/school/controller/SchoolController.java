@@ -46,7 +46,7 @@ public class SchoolController {
 
 	@Autowired
 	SchoolService schoolService;
-	
+
 	@Autowired
 	StudentService studentService;
 
@@ -85,7 +85,7 @@ public class SchoolController {
 	@RequestMapping(method = RequestMethod.POST, path = "/school/getClassDetail")
 	public ResponseEntity<ClassVO> getClassDetail(@RequestBody ClassVO classVO) {
 		ClassVO classDetail = schoolService.getStudentAndTeamDetailsByClassId(classVO.getId()).get();
-		if(classVO.getSchoolId() != 0L) {
+		if (classVO.getSchoolId() != 0L) {
 			classDetail.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
 		}
 		logger.debug("Retrieved student count ==> {} for classId {}",
@@ -125,19 +125,19 @@ public class SchoolController {
 	@RequestMapping(method = RequestMethod.POST, path = "/school/submitschool")
 	public ResponseEntity<SchoolVO> submitSchool(@RequestBody SchoolVO schoolVO) {
 		try {
-			if(schoolVO.getAction().equalsIgnoreCase("create")) {
+			if (schoolVO.getAction().equalsIgnoreCase("create")) {
 				schoolService.saveSchool(schoolVO);
 				logger.debug("School Saved successfully with id {} ==> " + schoolVO.getId());
 			}
-			if(schoolVO.getAction().equalsIgnoreCase("edit")) {
+			if (schoolVO.getAction().equalsIgnoreCase("edit")) {
 				schoolService.updateSchool(schoolVO);
 				logger.debug("School Updated successfully with id {} ==> " + schoolVO.getId());
 			}
 		} catch (ParseException e) {
-			logger.debug("Exception occured while parsing the input dates from ui",e);
+			logger.debug("Exception occured while parsing the input dates from ui", e);
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
-	
+
 		return ResponseEntity.status(HttpStatus.OK).body(schoolVO);
 	}
 
@@ -152,10 +152,24 @@ public class SchoolController {
 		try {
 			schoolVO = schoolService.getSchoolDetail(schoolId);
 		} catch (ParseException e) {
-			logger.debug("Exception occured while retrieving the school data for id {} {}",schoolId,e);
+			logger.debug("Exception occured while retrieving the school data for id {} {}", schoolId, e);
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
 		logger.debug("School retrieved with class count {} ==> " + schoolVO.getClassList().size());
 		return ResponseEntity.status(HttpStatus.OK).body(schoolVO);
+	}
+
+	/**
+	 * To save or update list of students in a class
+	 * 
+	 * @return schoolVO
+	 */
+	@RequestMapping(method = RequestMethod.POST, path = "/school/saveclassstudents")
+	public ResponseEntity<ClassVO> saveStudents(@RequestBody ClassVO classVO) {
+		classVO = studentService.saveStudents(classVO);
+		// Refresh the state list based on the update
+		classVO.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
+		logger.debug("Student details updated. student count {} ==> " + classVO.getStudentList().size());
+		return ResponseEntity.status(HttpStatus.OK).body(classVO);
 	}
 }

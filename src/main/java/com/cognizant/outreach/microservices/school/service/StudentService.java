@@ -16,6 +16,7 @@ package com.cognizant.outreach.microservices.school.service;
 
 import java.util.List;
 
+import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.TeamNameCountVO;
 
 public interface StudentService {
@@ -27,4 +28,11 @@ public interface StudentService {
 	 */
 	public List<TeamNameCountVO> getSchoolTeamList(long schoolId);
 
+	
+	/**
+	 * To save or update students
+	 * 
+	 * @return ClassVO with updated id informations 
+	 */
+	public ClassVO saveStudents(ClassVO classVO);
 }

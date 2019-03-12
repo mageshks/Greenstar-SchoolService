@@ -13,5 +13,5 @@ import com.cognizant.outreach.entity.Student;
  */
 @RestResource(exported = false)
 public interface StudentRepository extends CrudRepository<Student, Long> {
-	
+
 }

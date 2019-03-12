@@ -25,6 +25,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.cognizant.outreach.entity.ClassDetail;
 import com.cognizant.outreach.entity.IndiaStateDistrict;
@@ -236,20 +237,24 @@ public class SchoolServiceImpl implements SchoolService {
 	}
 
 	private void saveHolidays(String userId, School school, List<HolidayVO> holidayVOs) throws ParseException {
-		for (HolidayVO holidayVO : holidayVOs) {
-			SchoolHoliday schoolHoliday = SchoolHelper.populateHoliday(userId, school, holidayVO, false);
-			schoolHolidayRepository.save(schoolHoliday);
-			holidayVO.setId(schoolHoliday.getId());
+		if (!CollectionUtils.isEmpty(holidayVOs)) {
+			for (HolidayVO holidayVO : holidayVOs) {
+				SchoolHoliday schoolHoliday = SchoolHelper.populateHoliday(userId, school, holidayVO, false);
+				schoolHolidayRepository.save(schoolHoliday);
+				holidayVO.setId(schoolHoliday.getId());
+			}
 		}
 	}
 
 	private void saveWeekendWorkingDays(String userId, School school, List<WeekendWorkingDayVO> weekendWorkingDayVOs)
 			throws ParseException {
-		for (WeekendWorkingDayVO weekendWorkingDayVO : weekendWorkingDayVOs) {
-			SchoolWeekendWorkingDay schoolWeekendWorkingDay = SchoolHelper.populateWeekendWorkingDay(userId, school,
-					weekendWorkingDayVO, false);
-			weekendWorkingDayRepository.save(schoolWeekendWorkingDay);
-			weekendWorkingDayVO.setId(schoolWeekendWorkingDay.getId());
+		if (!CollectionUtils.isEmpty(weekendWorkingDayVOs)) {
+			for (WeekendWorkingDayVO weekendWorkingDayVO : weekendWorkingDayVOs) {
+				SchoolWeekendWorkingDay schoolWeekendWorkingDay = SchoolHelper.populateWeekendWorkingDay(userId, school,
+						weekendWorkingDayVO, false);
+				weekendWorkingDayRepository.save(schoolWeekendWorkingDay);
+				weekendWorkingDayVO.setId(schoolWeekendWorkingDay.getId());
+			}
 		}
 	}
 
