@@ -140,6 +140,7 @@ public class SchoolServiceImpl implements SchoolService {
 			}
 			classVO.setTeamList(teamList);
 			classVO.setStudentList(studentVOs);
+			classVO.setId(classId);
 		}
 		return Optional.of(classVO);
 	}

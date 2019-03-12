@@ -25,8 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.cognizant.outreach.entity.ClassDetail;
 import com.cognizant.outreach.entity.Student;
 import com.cognizant.outreach.entity.StudentSchoolAssoc;
+import com.cognizant.outreach.microservices.school.dao.ClassRepository;
 import com.cognizant.outreach.microservices.school.dao.MeasurableParamDataRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentSchoolAssocRepository;
@@ -51,6 +53,9 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	MeasurableParamDataRepository measurableParamDataRepository;
+	
+	@Autowired
+	ClassRepository classRepository;
 
 	@Override
 	public List<TeamNameCountVO> getSchoolTeamList(long schoolId) {
@@ -87,6 +92,8 @@ public class StudentServiceImpl implements StudentService {
 					association.setStatus("ACTIVE");
 					association.setStudent(student);
 					association.setTeamName(studentVO.getTeamName().toLowerCase());
+					ClassDetail classDetail = classRepository.findById(classVO.getId()).get();
+					association.setClazz(classDetail);
 					SchoolHelper.addAuditInfo(classVO.getUserId(), association);
 					studentSchoolAssocRepository.save(association);
 					studentVO.setAssociationId(association.getId());
@@ -120,8 +127,8 @@ public class StudentServiceImpl implements StudentService {
 			// If the db association not present in the existing list list the student
 			for (StudentSchoolAssoc studentSchoolAssoc : associations.get()) {
 				if (null == uiStudentMap.get(studentSchoolAssoc.getId())) {
-					studentSchoolAssocRepository.delete(studentSchoolAssoc);
 					measurableParamDataRepository.deleteByStudentSchoolAssocId(studentSchoolAssoc.getId());
+					studentSchoolAssocRepository.delete(studentSchoolAssoc);
 				}
 			}
 		}
