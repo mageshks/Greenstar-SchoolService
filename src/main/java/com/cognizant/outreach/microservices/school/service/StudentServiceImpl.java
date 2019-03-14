@@ -61,7 +61,7 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	MeasurableParamDataRepository measurableParamDataRepository;
-	
+
 	@Autowired
 	ClassRepository classRepository;
 
@@ -75,7 +75,7 @@ public class StudentServiceImpl implements StudentService {
 				teamNameCountVO.setTeamName((String) dbRow[0]);
 				teamNameCountVO.setStudentCount(((Long) dbRow[1]).intValue());
 				teamNameCountVO.setClassId((Long) dbRow[2]);
-				teamNameCountVO.setClassSectionName((String) dbRow[3]+"-"+(String) dbRow[4]);
+				teamNameCountVO.setClassSectionName((String) dbRow[3] + "-" + (String) dbRow[4]);
 				teamNameCountVOs.add(teamNameCountVO);
 			}
 		}
@@ -150,15 +150,53 @@ public class StudentServiceImpl implements StudentService {
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet sheet = workbook.createSheet(ExcelHelper.EXCEL_INTRODUCTION_SHEETNAME);
 
-        ExcelHelper.fillInstructionsSheet(workbook,sheet,getSchoolTeamList(searchVO.getSchoolId()) );
-		
+		ExcelHelper.fillInstructionsSheet(workbook, sheet, getSchoolTeamList(searchVO.getSchoolId()));
+
+		Map<String, List<StudentVO>> studentClassMap = getStudentsClassMap(searchVO.getSchoolId());
+
+		ExcelHelper.createClassWiseSheets(workbook, studentClassMap);
+
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		workbook.write(bos);
 
 		return bos.toByteArray();
 	}
-	
 
+	private Map<String, List<StudentVO>> getStudentsClassMap(long schoolId) {
+		// Key as class and section string value as student
+		Map<String, List<StudentVO>> studentClassMap = initStudentClassMap(schoolId);
+
+		Optional<List<StudentSchoolAssoc>> schoolAssociations = studentSchoolAssocRepository
+				.findByClazzSchoolId(schoolId);
+		if (null != studentClassMap && schoolAssociations.isPresent()) {
+			for (StudentSchoolAssoc studentSchoolAssoc : schoolAssociations.get()) {
+				StudentVO studentVO = new StudentVO();
+				studentVO.setAssociationId(studentSchoolAssoc.getId());
+				studentVO.setClassId(studentSchoolAssoc.getClazz().getId());
+				studentVO.setId(studentSchoolAssoc.getStudent().getId());
+				studentVO.setRollId(studentSchoolAssoc.getRollId());
+				studentVO.setTeamName(studentSchoolAssoc.getTeamName());
+				studentVO.setStudentName(studentSchoolAssoc.getStudent().getStudentName());
+				studentClassMap.get(studentSchoolAssoc.getClazz().getClassAndSection()).add(studentVO);
+			}
+		}
+		return studentClassMap;
+	}
+
+	/**
+	 * Method to init student class map
+	 */
+	private Map<String, List<StudentVO>> initStudentClassMap(long schoolId) {
+		Optional<List<ClassDetail>> classes = classRepository.findClassesBySchoolId(schoolId);
+		Map<String, List<StudentVO>> studentClassMap = null;
+		if (classes.isPresent()) {
+			studentClassMap = new HashMap<>();
+			for (ClassDetail classDetail : classes.get()) {
+				studentClassMap.put(classDetail.getClassAndSection(), new ArrayList<>());
+			}
+		}
+		return studentClassMap;
+	}
 
 	@Override
 	public ResponseEntity<ClassVO> uploadStudentData(MultipartFile file, String userId) {
