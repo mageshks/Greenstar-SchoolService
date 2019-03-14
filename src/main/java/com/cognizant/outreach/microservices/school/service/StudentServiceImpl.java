@@ -22,16 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +38,7 @@ import com.cognizant.outreach.microservices.school.dao.ClassRepository;
 import com.cognizant.outreach.microservices.school.dao.MeasurableParamDataRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentSchoolAssocRepository;
+import com.cognizant.outreach.microservices.school.helper.ExcelHelper;
 import com.cognizant.outreach.microservices.school.helper.SchoolHelper;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.StudentSearchVO;
@@ -157,65 +148,17 @@ public class StudentServiceImpl implements StudentService {
 	public byte[] downloadTemplate(StudentSearchVO searchVO) throws IOException {
 		// Create Work book
 		XSSFWorkbook workbook = new XSSFWorkbook();
-		XSSFSheet sheet = workbook.createSheet("Upload Info");
+		XSSFSheet sheet = workbook.createSheet(ExcelHelper.EXCEL_INTRODUCTION_SHEETNAME);
 
-		Row row = sheet.createRow(1);
-		Cell headerCell = row.createCell(2);
-		headerCell.setCellValue("Introduction");
-		headerCell.setCellStyle(this.getIntroductionHeaderCellStyle(workbook));
-		CellRangeAddress cellMerge = new CellRangeAddress(1, 1, 2, 3);
-		sheet.addMergedRegion(cellMerge);
-		setBorder(cellMerge, headerCell, sheet, workbook);
+        ExcelHelper.fillInstructionsSheet(workbook,sheet,getSchoolTeamList(searchVO.getSchoolId()) );
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		workbook.write(bos);
-		
+
 		return bos.toByteArray();
 	}
 	
-	private CellStyle getIntroductionHeaderCellStyle(Workbook workBook) {
 
-        CellStyle cellStyle = workBook.createCellStyle();
-
-        // To Set Font Style
-        Font font = workBook.createFont();
-        font.setFontHeightInPoints((short) 11);
-        font.setColor(IndexedColors.BLACK.getIndex());
-        font.setBold(true);
-        cellStyle.setFont(font);
-
-        cellStyle.setAlignment((short)HorizontalAlignment.CENTER.ordinal());
-        cellStyle.setVerticalAlignment((short)VerticalAlignment.CENTER.ordinal());
-        
-        return cellStyle;
-	}
-	
-	private void setBorder(CellRangeAddress region, Cell cell, XSSFSheet sheet, XSSFWorkbook workbook) {
-		
-		RegionUtil.setBorderBottom(1, region, sheet, workbook);
-		RegionUtil.setBorderTop(1, region, sheet, workbook);
-		RegionUtil.setBorderLeft(1, region, sheet, workbook);
-		RegionUtil.setBorderRight(1, region, sheet, workbook);
-				
-		CellStyle cellStyle = cell.getCellStyle();
-		cellStyle.setFillBackgroundColor(IndexedColors.WHITE.getIndex());
-	}
-	
-	private CellStyle getIntroductionValueItemsCellStyle(Workbook workBook) {
-
-        CellStyle cellStyle = workBook.createCellStyle();
-
-        // To Set Font Style
-        Font font = workBook.createFont();
-        font.setFontHeightInPoints((short) 11);
-        font.setColor(IndexedColors.BLACK.getIndex());
-        cellStyle.setFont(font);
-
-        cellStyle.setAlignment((short)HorizontalAlignment.LEFT.ordinal());
-        cellStyle.setVerticalAlignment((short)VerticalAlignment.CENTER.ordinal());
-        
-        return cellStyle;
-	}
 
 	@Override
 	public ResponseEntity<ClassVO> uploadStudentData(MultipartFile file, String userId) {
