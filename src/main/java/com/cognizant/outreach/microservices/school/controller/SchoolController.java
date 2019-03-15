@@ -103,7 +103,7 @@ public class SchoolController {
 	 * 
 	 * @return statelist
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/getStates")
+	@RequestMapping(method = RequestMethod.POST, path = "/school/getStates")
 	public ResponseEntity<List<StateVO>> getStates() {
 		List<StateVO> states = schoolService.getStates();
 		logger.debug("Retreived state count {}", states.size());
