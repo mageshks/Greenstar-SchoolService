@@ -177,7 +177,7 @@ public class SchoolController {
 		logger.debug("Student details updated. student count {} ==> " + classVO.getStudentList().size());
 		return ResponseEntity.status(HttpStatus.OK).body(classVO);
 	}
-	
+
 	/**
 	 * Method to download the bulk upload template excel file format.
 	 * 
@@ -186,11 +186,20 @@ public class SchoolController {
 	 * @throws IOException
 	 */
 	@PostMapping("/school/student/downloadtemplate")
-	public byte[] downloadTemplate(@RequestBody StudentSearchVO searchVO) throws IOException {
-		return studentService.downloadTemplate(searchVO);
+	public ResponseEntity<byte[]> downloadTemplate(@RequestBody StudentSearchVO searchVO) throws IOException {
+		byte[] excelBytes = null;
+
+		try {
+			excelBytes = studentService.downloadTemplate(searchVO);
+		} catch (Exception exception) {
+			logger.debug("Exception occured while downloading template for school ==> {}", searchVO.getSchoolId());
+			logger.debug(exception.getMessage());
+			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(excelBytes);
+		}
+		logger.debug("Excel template retrival successfull for school ==> {}", searchVO.getSchoolId());
+		return ResponseEntity.status(HttpStatus.OK).body(excelBytes);
 	}
-	
-	
+
 	/**
 	 * Method to upload the bulk upload student data file.
 	 * 
@@ -200,11 +209,18 @@ public class SchoolController {
 	 * @throws IOException
 	 */
 	@PostMapping("/school/student/uploadbulkdata")
-	public ResponseEntity<String> bulkUploadStudentData(@RequestParam("file") MultipartFile file, 
-			@RequestParam("userId") String userId,
-			@RequestParam("schoolId") String schoolId) throws IOException {
-		 studentService.uploadStudentData(file, userId);
-		
-		return ResponseEntity.status(HttpStatus.OK).body("");
+	public ResponseEntity<String> bulkUploadStudentData(@RequestParam("file") MultipartFile file,
+			@RequestParam("userId") String userId, @RequestParam("schoolId") String schoolId) throws IOException {
+		String responseMessage = null;
+		try {
+			responseMessage = studentService.uploadStudentData(file, userId);
+
+		} catch (Exception e) {
+			logger.debug("Exception occured while uploading students for school ==> {}", schoolId);
+			logger.debug(e.getMessage());
+			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("");
+		}
+		logger.debug("Bulk uplaod processed for school ==> {} with the response message {}", schoolId,responseMessage);
+		return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
 	}
 }

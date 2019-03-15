@@ -15,9 +15,9 @@
 package com.cognizant.outreach.microservices.school.service;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
@@ -58,7 +58,9 @@ public interface StudentService {
 	 * 
 	 * @param file
 	 * @param userId
-	 * @return
+	 * @return String returns the message if success else error message to be displayed
+	 * @throws ParseException 
+	 * @throws IOException 
 	 */
-	public ResponseEntity<ClassVO> uploadStudentData(MultipartFile file, String userId);
+	public String uploadStudentData(MultipartFile file, String userId) throws ParseException, IOException;
 }

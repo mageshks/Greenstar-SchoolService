@@ -66,6 +66,7 @@ public class SchoolHelper {
 			classVO.setId(classDetail.getId());
 			classVO.setClassName(classDetail.getClassName());
 			classVO.setSectionName(classDetail.getSection());
+			classVO.setClassAndSectionName(classDetail.getClassAndSection());
 			ClassVOs.add(classVO);
 		}
 		return ClassVOs;
