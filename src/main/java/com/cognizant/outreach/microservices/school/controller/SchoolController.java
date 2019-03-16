@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,11 +91,10 @@ public class SchoolController {
 	@RequestMapping(method = RequestMethod.POST, path = "/school/getClassDetail")
 	public ResponseEntity<ClassVO> getClassDetail(@RequestBody ClassVO classVO) {
 		ClassVO classDetail = schoolService.getStudentAndTeamDetailsByClassId(classVO.getId()).get();
-		if (classVO.getSchoolId() != 0L) {
-			classDetail.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
-		}
+		classDetail.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
 		logger.debug("Retrieved student count ==> {} for classId {}",
-				null == classDetail ? null : classDetail.getStudentList().size(), classVO.getId());
+				CollectionUtils.isEmpty(classDetail.getStudentList()) ? 0 : classDetail.getStudentList().size(),
+				classVO.getId());
 		return ResponseEntity.status(HttpStatus.OK).body(classDetail);
 	}
 
@@ -218,9 +218,9 @@ public class SchoolController {
 		} catch (Exception e) {
 			logger.debug("Exception occured while uploading students for school ==> {}", schoolId);
 			logger.debug(e.getMessage());
-			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("");
+			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
-		logger.debug("Bulk uplaod processed for school ==> {} with the response message {}", schoolId,responseMessage);
+		logger.debug("Bulk uplaod processed for school ==> {} with the response message {}", schoolId, responseMessage);
 		return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
 	}
 }

@@ -118,7 +118,7 @@ public class SchoolServiceImpl implements SchoolService {
 	public Optional<ClassVO> getStudentAndTeamDetailsByClassId(long classId) {
 		Optional<List<StudentSchoolAssoc>> studentSchoolAssociations = studentSchoolAssocRepository
 				.findClassDetailByClassId(classId);
-		ClassVO classVO = null;
+		ClassVO classVO;
 
 		if (studentSchoolAssociations.isPresent()) {
 			classVO = new ClassVO();
@@ -141,6 +141,10 @@ public class SchoolServiceImpl implements SchoolService {
 			classVO.setTeamList(teamList);
 			classVO.setStudentList(studentVOs);
 			classVO.setId(classId);
+		}else {
+			classVO = new ClassVO();
+			classVO.setId(classId);
+			classVO.setStudentList(new ArrayList<>());
 		}
 		return Optional.of(classVO);
 	}
