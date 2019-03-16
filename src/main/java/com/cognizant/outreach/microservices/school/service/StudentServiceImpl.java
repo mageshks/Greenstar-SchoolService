@@ -76,20 +76,20 @@ public class StudentServiceImpl implements StudentService {
 	SchoolService schoolService;
 
 	private static final String CLASS_COUNT_MISMATCH = "It seems the template meta data is modified. Either class or instruction sheet is removed while loading.";
-	private static final String CLASS_NAME_NOT_EXIST = "It seems the template meta data is modified. There is no class exist in database with name ==> ";
-	private static final String SHEET_HEADER_METADATA_MODIFIED = "It seems the template meta data is modified. The header is modified in the sheet ==> ";
-	private static final String STUDENT_ID_MODIFIED = "Student id in hidden feild is modified as it is not valid student id in database in sheet ==> ";
-	private static final String AT_ROW_NUM = "at row number ==>";
-	private static final String STUDENT_NAME_EMPTY = "Student name is empty in sheet ==> ";
-	private static final String TEAM_NAME_EMPTY = "Team name is empty in sheet ==> ";
+	private static final String CLASS_NAME_NOT_EXIST = "It seems the template meta data is modified. There is no class exist in database with name :: ";
+	private static final String SHEET_HEADER_METADATA_MODIFIED = "It seems the template meta data is modified. The header is modified in the sheet :: ";
+	private static final String STUDENT_ID_MODIFIED = "Student id in hidden feild is modified as it is not valid student id in database in sheet :: ";
+	private static final String AT_ROW_NUM = "at row number :: ";
+	private static final String STUDENT_NAME_EMPTY = "Student name is empty in sheet :: ";
+	private static final String TEAM_NAME_EMPTY = "Team name is empty in sheet :: ";
 	private static final String BLANK = "";
 	private static final String BULK_UPLOAD_SUCCESS = "Bulk Uplaod Successful!";
-	private static final String TEAM_NAME = "Team Name ==> ";
-	private static final String TEAM_AREADY_CHOOSED = "already choosen for class ==> ";
-	private static final String TEAM_HAS_5_STUDENTS = "already has 5 students which is the maximum ==> ";
-	private static final String TEAM_COUNT_NOT_VALID = "Number of students on a team should be minimum 3 and maximum 5, please check class ==> ";
-	private static final String WITH_TEAM_NAME = " with team name ==> ";
-	private static final String HAS_COUNT = "has count ==> ";
+	private static final String TEAM_NAME = "Team Name :: ";
+	private static final String TEAM_AREADY_CHOOSED = " already choosen for class :: ";
+	private static final String TEAM_HAS_5_STUDENTS = " have more than 5 students which is the maximum :: ";
+	private static final String TEAM_COUNT_NOT_VALID = "Number of students on a team should be minimum 3 and maximum 5, please check class :: ";
+	private static final String WITH_TEAM_NAME = " with team name :: ";
+	private static final String HAS_COUNT = " has count :: ";
 
 	@Override
 	public List<TeamNameCountVO> getSchoolTeamList(long schoolId) {
@@ -175,12 +175,15 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public byte[] downloadTemplate(StudentSearchVO searchVO) throws IOException {
+	public byte[] downloadTemplate(StudentSearchVO searchVO, boolean isExport) throws IOException {
 		// Create Work book
 		XSSFWorkbook workbook = new XSSFWorkbook();
-		XSSFSheet sheet = workbook.createSheet(ExcelHelper.EXCEL_INTRODUCTION_SHEETNAME);
+		// If not export then add the introduction sheet
+		if (!isExport) {
+			XSSFSheet sheet = workbook.createSheet(ExcelHelper.EXCEL_INTRODUCTION_SHEETNAME);
 
-		ExcelHelper.fillInstructionsSheet(workbook, sheet, getSchoolTeamList(searchVO.getSchoolId()));
+			ExcelHelper.fillInstructionsSheet(workbook, sheet, getSchoolTeamList(searchVO.getSchoolId()));
+		}
 
 		Map<String, List<StudentVO>> studentClassMap = getStudentsClassMap(searchVO.getSchoolId());
 
@@ -287,7 +290,7 @@ public class StudentServiceImpl implements StudentService {
 							.concat(teamNameCountVO.getStudentCount() + BLANK);
 				}
 			}
-			
+
 			// Finally save or update all the students to the DB
 			for (ClassVO classVO2 : excelClasses) {
 				classVO2.setUserId(userId);
@@ -298,24 +301,31 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	private String validateTeamCountAndUniquness(ClassVO classVO, long schoolId,
-			Map<String, TeamNameCountVO> teamNameMap) {
+			Map<String, TeamNameCountVO> teamNameMapForSchool) {
+		// Holds only the class level team information, after final validation this will
+		// merged with school map
+		Map<String, TeamNameCountVO> teamNameMapForClass = new HashMap<>();
+
 		if (!CollectionUtils.isEmpty(classVO.getStudentList())) {
 			for (StudentVO studentVO : classVO.getStudentList()) {
-				TeamNameCountVO teamNameCountVO = teamNameMap.get(studentVO.getTeamName());
+				TeamNameCountVO teamNameCountVOSchoolLevel = teamNameMapForSchool.get(studentVO.getTeamName());
 				// If the team already choosen by other class return with error message
-				if (null != teamNameCountVO
-						&& !teamNameCountVO.getClassSectionName().equals(classVO.getClassAndSectionName())) {
+				if (null != teamNameCountVOSchoolLevel
+						&& !teamNameCountVOSchoolLevel.getClassSectionName().equals(classVO.getClassAndSectionName())) {
 					return TEAM_NAME.concat(studentVO.getTeamName()).concat(TEAM_AREADY_CHOOSED)
-							.concat(teamNameCountVO.getClassSectionName());
-				} else if (null != teamNameCountVO) {
+							.concat(teamNameCountVOSchoolLevel.getClassSectionName());
+				}
+				TeamNameCountVO teamNameCountVOClassLevel = teamNameMapForClass.get(studentVO.getTeamName());
+
+				if (null != teamNameCountVOClassLevel) {
 					// If team name already present within the class check if the count maximum
 					// count is already 5
-					if (teamNameCountVO.getStudentCount() == 5) {
+					if (teamNameCountVOClassLevel.getStudentCount() == 5) {
 						return TEAM_NAME.concat(studentVO.getTeamName()).concat(TEAM_HAS_5_STUDENTS)
-								.concat(teamNameCountVO.getClassSectionName());
+								.concat(teamNameCountVOClassLevel.getClassSectionName());
 					} else {
-						// If not 5 then increment the count to use for the next student validation
-						teamNameCountVO.setStudentCount(teamNameCountVO.getStudentCount() + 1);
+						// If not reached 5 then increment the count
+						teamNameCountVOClassLevel.setStudentCount(teamNameCountVOClassLevel.getStudentCount() + 1);
 					}
 				} else {
 					// New team name
@@ -326,8 +336,13 @@ public class StudentServiceImpl implements StudentService {
 					newTeamNameCountVO.setTeamName(studentVO.getTeamName());
 					newTeamNameCountVO.setClassSectionName(classVO.getClassAndSectionName());
 					newTeamNameCountVO.setStudentCount(1);
-					teamNameMap.put(studentVO.getTeamName(), newTeamNameCountVO);
+					teamNameMapForClass.put(studentVO.getTeamName(), newTeamNameCountVO);
 				}
+			}
+
+			// Update the school map with the class level details
+			for (Map.Entry<String, TeamNameCountVO> entry : teamNameMapForClass.entrySet()) {
+				teamNameMapForSchool.put(entry.getKey(), entry.getValue());
 			}
 		}
 		return null;

@@ -47,10 +47,11 @@ public interface StudentService {
 	 * 
 	 * 
 	 * @param searchVO
+	 * @param isExport true when the call is for student export
 	 * @return
 	 * @throws IOException 
 	 */
-	public byte[] downloadTemplate(StudentSearchVO searchVO) throws IOException;
+	public byte[] downloadTemplate(StudentSearchVO searchVO, boolean isExport) throws IOException;
 
 
 	/**

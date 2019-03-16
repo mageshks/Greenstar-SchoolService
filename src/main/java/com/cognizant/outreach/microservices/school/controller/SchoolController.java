@@ -190,7 +190,7 @@ public class SchoolController {
 		byte[] excelBytes = null;
 
 		try {
-			excelBytes = studentService.downloadTemplate(searchVO);
+			excelBytes = studentService.downloadTemplate(searchVO,false);
 		} catch (Exception exception) {
 			logger.debug("Exception occured while downloading template for school ==> {}", searchVO.getSchoolId());
 			logger.debug(exception.getMessage());
@@ -200,6 +200,28 @@ public class SchoolController {
 		return ResponseEntity.status(HttpStatus.OK).body(excelBytes);
 	}
 
+	/**
+	 * Method to export school students data as excel
+	 * 
+	 * @param StudentSearchVO
+	 * @return excel byte array
+	 * @throws IOException
+	 */
+	@PostMapping("/school/student/exportstudents")
+	public ResponseEntity<byte[]> exportStudents(@RequestBody StudentSearchVO searchVO) throws IOException {
+		byte[] excelBytes = null;
+
+		try {
+			excelBytes = studentService.downloadTemplate(searchVO,true);
+		} catch (Exception exception) {
+			logger.debug("Exception occured while creating excel for school ==> {}", searchVO.getSchoolId());
+			logger.debug(exception.getMessage());
+			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(excelBytes);
+		}
+		logger.debug("Excel retrival successfull for school ==> {}", searchVO.getSchoolId());
+		return ResponseEntity.status(HttpStatus.OK).body(excelBytes);
+	}
+	
 	/**
 	 * Method to upload the bulk upload student data file.
 	 * 
@@ -221,6 +243,7 @@ public class SchoolController {
 			ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
 		}
 		logger.debug("Bulk uplaod processed for school ==> {} with the response message {}", schoolId, responseMessage);
-		return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+		String responseString = "\""+responseMessage+"\"";
+		return ResponseEntity.status(HttpStatus.OK).body(responseString);
 	}
 }
