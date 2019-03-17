@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +46,6 @@ import com.cognizant.outreach.microservices.school.vo.StudentSearchVO;
  * @author 371793
  */
 @RestController
-@CrossOrigin
 public class SchoolController {
 
 	@Autowired
@@ -63,7 +61,7 @@ public class SchoolController {
 	 * 
 	 * @return List of schools if present else null
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getSchools")
+	@RequestMapping(method = RequestMethod.POST, path = "/getSchools")
 	public ResponseEntity<List<SchoolVO>> getSchools() {
 		List<SchoolVO> schools = schoolService.getSchools().get();
 		logger.debug("Retrieved school count ==> ", null == schools ? null : schools.size());
@@ -75,7 +73,7 @@ public class SchoolController {
 	 * 
 	 * @return List of class if present else null
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getClassList")
+	@RequestMapping(method = RequestMethod.POST, path = "/getClassList")
 	public ResponseEntity<List<ClassVO>> getClassDetail(@RequestBody SchoolVO schoolVO) {
 		List<ClassVO> classVOs = schoolService.getClassBySchoolId(schoolVO.getId()).get();
 		logger.debug("Retrieved class count ==> {} for schoolId {}", null == classVOs ? null : classVOs.size(),
@@ -88,7 +86,7 @@ public class SchoolController {
 	 * 
 	 * @return class detail if present else null
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getClassDetail")
+	@RequestMapping(method = RequestMethod.POST, path = "/getClassDetail")
 	public ResponseEntity<ClassVO> getClassDetail(@RequestBody ClassVO classVO) {
 		ClassVO classDetail = schoolService.getStudentAndTeamDetailsByClassId(classVO.getId()).get();
 		classDetail.setSchoolTeamList((studentService.getSchoolTeamList(classVO.getSchoolId())));
@@ -103,7 +101,7 @@ public class SchoolController {
 	 * 
 	 * @return statelist
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getStates")
+	@RequestMapping(method = RequestMethod.POST, path = "/getStates")
 	public ResponseEntity<List<StateVO>> getStates() {
 		List<StateVO> states = schoolService.getStates();
 		logger.debug("Retreived state count {}", states.size());
@@ -115,7 +113,7 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getSchoolsForSearch")
+	@RequestMapping(method = RequestMethod.POST, path = "/getSchoolsForSearch")
 	public ResponseEntity<List<SchoolVO>> getSchoolList(@RequestBody SchoolSearchVO schoolSearchVO) {
 		List<SchoolVO> schools = schoolService.getSchoolsForSearch(schoolSearchVO);
 		logger.debug("Retreived school count {}", schools.size());
@@ -127,7 +125,7 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/submitschool")
+	@RequestMapping(method = RequestMethod.POST, path = "/submitschool")
 	public ResponseEntity<SchoolVO> submitSchool(@RequestBody SchoolVO schoolVO) {
 		try {
 			if (schoolVO.getAction().equalsIgnoreCase("create")) {
@@ -151,7 +149,7 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/getschooldetail")
+	@RequestMapping(method = RequestMethod.POST, path = "/getschooldetail")
 	public ResponseEntity<SchoolVO> getSchoolList(@RequestBody long schoolId) {
 		SchoolVO schoolVO;
 		try {
@@ -169,7 +167,7 @@ public class SchoolController {
 	 * 
 	 * @return schoolVO
 	 */
-	@RequestMapping(method = RequestMethod.POST, path = "/school/saveclassstudents")
+	@RequestMapping(method = RequestMethod.POST, path = "/saveclassstudents")
 	public ResponseEntity<ClassVO> saveStudents(@RequestBody ClassVO classVO) {
 		classVO = studentService.saveStudents(classVO);
 		// Refresh the state list based on the update
@@ -185,7 +183,7 @@ public class SchoolController {
 	 * @return excel byte array
 	 * @throws IOException
 	 */
-	@PostMapping("/school/student/downloadtemplate")
+	@PostMapping("/student/downloadtemplate")
 	public ResponseEntity<byte[]> downloadTemplate(@RequestBody StudentSearchVO searchVO) throws IOException {
 		byte[] excelBytes = null;
 
@@ -207,7 +205,7 @@ public class SchoolController {
 	 * @return excel byte array
 	 * @throws IOException
 	 */
-	@PostMapping("/school/student/exportstudents")
+	@PostMapping("/student/exportstudents")
 	public ResponseEntity<byte[]> exportStudents(@RequestBody StudentSearchVO searchVO) throws IOException {
 		byte[] excelBytes = null;
 
@@ -230,7 +228,7 @@ public class SchoolController {
 	 * @return
 	 * @throws IOException
 	 */
-	@PostMapping("/school/student/uploadbulkdata")
+	@PostMapping("/student/uploadbulkdata")
 	public ResponseEntity<String> bulkUploadStudentData(@RequestParam("file") MultipartFile file,
 			@RequestParam("userId") String userId, @RequestParam("schoolId") String schoolId) throws IOException {
 		String responseMessage = null;
