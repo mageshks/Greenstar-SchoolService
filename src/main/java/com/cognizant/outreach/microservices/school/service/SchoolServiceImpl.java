@@ -58,6 +58,8 @@ import com.cognizant.outreach.microservices.school.vo.WeekendWorkingDayVO;
  */
 @Service
 public class SchoolServiceImpl implements SchoolService {
+	
+	
 
 	@Autowired
 	SchoolRepository schoolRespository;
@@ -211,7 +213,7 @@ public class SchoolServiceImpl implements SchoolService {
 	@Transactional
 	public SchoolVO saveSchool(SchoolVO schoolVO) throws ParseException {
 		School school = SchoolHelper.populateSchool(schoolVO, null, false);
-		schoolRespository.save(school);
+		school = schoolRespository.save(school);
 		schoolVO.setId(school.getId());
 		saveClasses(schoolVO.getUserId(), school, schoolVO.getClassList());
 		savePerfParameters(schoolVO.getUserId(), school, schoolVO.getPerfParamList());
@@ -228,7 +230,7 @@ public class SchoolServiceImpl implements SchoolService {
 
 	private void saveClass(String userId, School school, ClassVO classVO) {
 		ClassDetail classDetail = SchoolHelper.populateClass(userId, school, classVO, null, false);
-		classRepository.save(classDetail);
+		classDetail = classRepository.save(classDetail);
 		classVO.setId(classDetail.getId());
 	}
 
@@ -236,7 +238,7 @@ public class SchoolServiceImpl implements SchoolService {
 		for (PerformanceParamVO performanceParamVO : performanceParamVOs) {
 			MeasurableParam measurableParam = SchoolHelper.populateParam(userId, school, null, performanceParamVO,
 					false);
-			measurableParamRepository.save(measurableParam);
+			measurableParam = measurableParamRepository.save(measurableParam);
 			performanceParamVO.setId(measurableParam.getId());
 		}
 	}
@@ -245,7 +247,7 @@ public class SchoolServiceImpl implements SchoolService {
 		if (!CollectionUtils.isEmpty(holidayVOs)) {
 			for (HolidayVO holidayVO : holidayVOs) {
 				SchoolHoliday schoolHoliday = SchoolHelper.populateHoliday(userId, school, holidayVO, false);
-				schoolHolidayRepository.save(schoolHoliday);
+				schoolHoliday = schoolHolidayRepository.save(schoolHoliday);
 				holidayVO.setId(schoolHoliday.getId());
 			}
 		}
@@ -257,7 +259,7 @@ public class SchoolServiceImpl implements SchoolService {
 			for (WeekendWorkingDayVO weekendWorkingDayVO : weekendWorkingDayVOs) {
 				SchoolWeekendWorkingDay schoolWeekendWorkingDay = SchoolHelper.populateWeekendWorkingDay(userId, school,
 						weekendWorkingDayVO, false);
-				weekendWorkingDayRepository.save(schoolWeekendWorkingDay);
+				schoolWeekendWorkingDay = weekendWorkingDayRepository.save(schoolWeekendWorkingDay);
 				weekendWorkingDayVO.setId(schoolWeekendWorkingDay.getId());
 			}
 		}
