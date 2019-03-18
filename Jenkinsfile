@@ -13,12 +13,14 @@ node {
         stage('Checkout') {
             git url: 'http://172.18.2.18/teamgreenstar/371793-Hackathon-SchoolService.git', credentialsId: 'mageshgitlabcred', branch: 'master'
         }
-
         stage('Build') {
-		  bat label: 'Maven Build status', script: 'mvn clean install'
+		  bat label: 'Maven Build status', script: 'mvn clean install -DskipTests'
+        }
+        stage('Test') {
+		  bat label: 'Maven Test', returnStatus: true, script: 'mvn test'
         }
         stage('Docker Image') {
-            bat label: 'Maven Build status',script: 'dockerx build --tag=greenstarapp-school-service-image:latest --rm=true .'
+            bat label: 'Docker Image',script: 'dockerx build --tag=greenstarapp-school-service:latest --rm=true .'
         }
         stage('Stop And Remove Container Exists') {
             /*To stop and remove if container exists or running. 
@@ -26,7 +28,7 @@ node {
             bat label: 'Stop/Remove if exists', returnStatus: true, script: 'dockerx stop greenstarapp-school-service-container && dockerx rm greenstarapp-school-service-container'
         }
         stage('Docker Run') {
-            bat label: 'Maven Build status', returnStatus: true, script: 'dockerx run -d --name=greenstarapp-school-service-container --publish=2620:2620 greenstarapp-school-service-image:latest'
+            bat label: 'Docker Run status', script: 'dockerx run --name=greenstarapp-school-service-docker -d --publish=2620:2620 -e eureka.client.serviceUrl.defaultZone="http://172.18.2.50:8761/eureka/" -e spring.datasource.url="jdbc:mysql://greenstardb:3306/greenstar?useSSL=false" --link greenstardb:mysql greenstarapp-school-service:latest'
         }
     }
 }
