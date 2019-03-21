@@ -29,7 +29,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
 
 import com.cognizant.outreach.microservices.school.service.SchoolService;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
@@ -43,8 +42,6 @@ import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class SchoolControllerMockServiceTest {
-	
-	MockMvc mockMvc;
 	
 	@InjectMocks
 	private SchoolController schoolController;
