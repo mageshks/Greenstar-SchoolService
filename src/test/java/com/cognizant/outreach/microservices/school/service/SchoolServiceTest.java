@@ -316,7 +316,7 @@ public class SchoolServiceTest {
 		return Optional.of(schools);
 	}
 
-	private Iterable<IndiaStateDistrict> getStates() {
+	public static Iterable<IndiaStateDistrict> getStates() {
 		List<IndiaStateDistrict> states = new ArrayList<>();
 		IndiaStateDistrict indiaStateDistrict = new IndiaStateDistrict();
 		indiaStateDistrict.setState("TamilNadu");
@@ -364,7 +364,7 @@ public class SchoolServiceTest {
 		return Optional.of(classDetails);
 	}
 
-	private Optional<List<Object[]>> getSchools() {
+	public static Optional<List<Object[]>> getSchools() {
 		List<Object[]> schools = new ArrayList<>();
 		Object[] schoolRow = { 1L, "Coimbatore Sr Sec School" };
 		schools.add(schoolRow);
