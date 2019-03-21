@@ -142,7 +142,7 @@ public class StudentServiceImpl implements StudentService {
 					Student student = new Student();
 					student.setStudentName(studentVO.getStudentName());
 					SchoolHelper.addAuditInfo(classVO.getUserId(), student);
-					studentRepository.save(student);
+					student = studentRepository.save(student);
 					studentVO.setId(student.getId());
 					// save associations
 					StudentSchoolAssoc association = new StudentSchoolAssoc();
@@ -153,7 +153,7 @@ public class StudentServiceImpl implements StudentService {
 					ClassDetail classDetail = classRepository.findById(classVO.getId()).get();
 					association.setClazz(classDetail);
 					SchoolHelper.addAuditInfo(classVO.getUserId(), association);
-					studentSchoolAssocRepository.save(association);
+					association = studentSchoolAssocRepository.save(association);
 					studentVO.setAssociationId(association.getId());
 				} else {
 					// Update student

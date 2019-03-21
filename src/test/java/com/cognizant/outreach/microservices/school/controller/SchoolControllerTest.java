@@ -34,8 +34,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.cognizant.outreach.microservices.school.vo.SchoolVO;
-
 
 /**
  * Test class for security service
@@ -66,25 +64,28 @@ public class SchoolControllerTest {
 
 
 	/**
-	 * To check if the passed invalid token
+	 * To check if the schools are retrieved
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void testGetSchools() throws Exception {
-
-
 		ResponseEntity<List> response1 = template.getForEntity("/getSchools", List.class);
-
 		Assert.assertEquals(HttpStatus.OK, response1.getStatusCode());
 	}
 	
 	
-	private HttpEntity<Object> getHttpEntity(Object body) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		return new HttpEntity<Object>(body, headers);
+	/**
+	 * To check if the schools are retrieved
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testGetStates() throws Exception {
+		ResponseEntity<List> response1 = template.getForEntity("/getStates", List.class);
+		Assert.assertEquals(HttpStatus.OK, response1.getStatusCode());
 	}
 	
+
 }
 
