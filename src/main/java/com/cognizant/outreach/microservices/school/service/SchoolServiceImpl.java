@@ -118,12 +118,22 @@ public class SchoolServiceImpl implements SchoolService {
 
 	@Override
 	public Optional<ClassVO> getStudentAndTeamDetailsByClassId(long classId) {
+		
 		Optional<List<StudentSchoolAssoc>> studentSchoolAssociations = studentSchoolAssocRepository
 				.findClassDetailByClassId(classId);
-		ClassVO classVO;
-
+				
+		Optional<ClassDetail> classDetail = classRepository.findById(classId);
+		
+		ClassVO classVO = new ClassVO();		
+		classVO.setId(classId);
+		classVO.setStudentList(new ArrayList<>());
+		
+		if(classDetail.isPresent()) {
+			classVO.setClassName(classDetail.get().getClassName());
+			classVO.setSectionName(classDetail.get().getSection());
+		}
+		
 		if (studentSchoolAssociations.isPresent()) {
-			classVO = new ClassVO();
 			List<String> teamList = new ArrayList<String>();
 			List<StudentVO> studentVOs = new ArrayList<StudentVO>();
 			for (StudentSchoolAssoc schoolAssoc : studentSchoolAssociations.get()) {
@@ -143,10 +153,6 @@ public class SchoolServiceImpl implements SchoolService {
 			classVO.setTeamList(teamList);
 			classVO.setStudentList(studentVOs);
 			classVO.setId(classId);
-		}else {
-			classVO = new ClassVO();
-			classVO.setId(classId);
-			classVO.setStudentList(new ArrayList<>());
 		}
 		return Optional.of(classVO);
 	}
