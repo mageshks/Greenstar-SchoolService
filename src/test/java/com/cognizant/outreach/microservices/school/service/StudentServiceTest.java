@@ -185,7 +185,103 @@ public class StudentServiceTest {
 		String message = studentService.uploadStudentData(multiPartFile, "magesh");
 		assertTrue(message.equalsIgnoreCase("Bulk Uplaod Successful!"));
 	}
+	
+	@Test
+	public void TestUploadStudentData_CorrectData_Random() throws IOException, ParseException {
+		File file = new File("src/test/resources/Bulk_Upload_Student_312_CorrectData_Random.xlsx");
+		FileInputStream filestream = new FileInputStream(file);
+		MultipartFile multiPartFile = new MockMultipartFile("file", file.getName(), "application/vnd.ms-excel",
+				IOUtils.toByteArray(filestream));
+		when(schoolService.getSchoolDetail(Mockito.any(Long.class))).thenReturn(getSchool());
+		when(studentSchoolAssocRepository.listTeamName(Mockito.any(Long.class))).thenReturn(getSchoolTeams1());
 
+		List<Long> ids = new ArrayList<>();
+		ids.add(1L);
+		when(studentRepository.save(Mockito.any(Student.class))).thenReturn(saveStudent());
+		when(studentSchoolAssocRepository.save(Mockito.any(StudentSchoolAssoc.class))).thenReturn(saveSchoolAssoc());
+		when(classRepository.findById(Mockito.any(Long.class))).thenReturn(getClassDetail());
+		when(studentRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveStudent()));
+		when(studentSchoolAssocRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveSchoolAssoc()));
+		when(studentSchoolAssocRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveSchoolAssoc()));
+		when(studentSchoolAssocRepository.findClassDetailByClassId(Mockito.any(Long.class)))
+				.thenReturn(getDBassociations());
+		when(studentSchoolAssocRepository.findClassDetailByClassId(Mockito.any(Long.class)))
+				.thenReturn(getDBassociations());
+		when(measurableParamDataRepository.deleteByStudentSchoolAssocId(Mockito.any(Long.class))).thenReturn(ids);
+		doNothing().when(studentSchoolAssocRepository).delete(Mockito.any(StudentSchoolAssoc.class));
+		doNothing().when(studentRepository).delete(Mockito.any(Student.class));
+
+		when(studentSchoolAssocRepository.findByClazzIdAndStudentId(Mockito.any(Long.class), Mockito.any(Long.class)))
+				.thenAnswer(new Answer<Optional<StudentSchoolAssoc>>() {
+
+					@Override
+					public Optional<StudentSchoolAssoc> answer(InvocationOnMock arg0) throws Throwable {
+						StudentSchoolAssoc schoolAssoc = new StudentSchoolAssoc();
+						Long studentId = arg0.getArgument(1);
+						Optional<StudentSchoolAssoc> optional;
+						if (studentId >= 1L && studentId <= 6L) {
+							schoolAssoc.setId(1L);
+							optional = Optional.of(schoolAssoc);
+						} else {
+							optional = Optional.empty();
+						}
+
+						return optional;
+					}
+				});
+
+		String message = studentService.uploadStudentData(multiPartFile, "magesh");
+		assertTrue(message.equalsIgnoreCase("Bulk Uplaod Successful!"));
+	}
+
+	@Test
+	public void TestUploadStudentData_CorrectData_Random_Morethan10Students() throws IOException, ParseException {
+		File file = new File("src/test/resources/Bulk_Upload_Student_312_CorrectData_Random11.xlsx");
+		FileInputStream filestream = new FileInputStream(file);
+		MultipartFile multiPartFile = new MockMultipartFile("file", file.getName(), "application/vnd.ms-excel",
+				IOUtils.toByteArray(filestream));
+		when(schoolService.getSchoolDetail(Mockito.any(Long.class))).thenReturn(getSchool());
+		when(studentSchoolAssocRepository.listTeamName(Mockito.any(Long.class))).thenReturn(getSchoolTeams1());
+
+		List<Long> ids = new ArrayList<>();
+		ids.add(1L);
+		when(studentRepository.save(Mockito.any(Student.class))).thenReturn(saveStudent());
+		when(studentSchoolAssocRepository.save(Mockito.any(StudentSchoolAssoc.class))).thenReturn(saveSchoolAssoc());
+		when(classRepository.findById(Mockito.any(Long.class))).thenReturn(getClassDetail());
+		when(studentRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveStudent()));
+		when(studentSchoolAssocRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveSchoolAssoc()));
+		when(studentSchoolAssocRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(saveSchoolAssoc()));
+		when(studentSchoolAssocRepository.findClassDetailByClassId(Mockito.any(Long.class)))
+				.thenReturn(getDBassociations());
+		when(studentSchoolAssocRepository.findClassDetailByClassId(Mockito.any(Long.class)))
+				.thenReturn(getDBassociations());
+		when(measurableParamDataRepository.deleteByStudentSchoolAssocId(Mockito.any(Long.class))).thenReturn(ids);
+		doNothing().when(studentSchoolAssocRepository).delete(Mockito.any(StudentSchoolAssoc.class));
+		doNothing().when(studentRepository).delete(Mockito.any(Student.class));
+
+		when(studentSchoolAssocRepository.findByClazzIdAndStudentId(Mockito.any(Long.class), Mockito.any(Long.class)))
+				.thenAnswer(new Answer<Optional<StudentSchoolAssoc>>() {
+
+					@Override
+					public Optional<StudentSchoolAssoc> answer(InvocationOnMock arg0) throws Throwable {
+						StudentSchoolAssoc schoolAssoc = new StudentSchoolAssoc();
+						Long studentId = arg0.getArgument(1);
+						Optional<StudentSchoolAssoc> optional;
+						if (studentId >= 1L && studentId <= 6L) {
+							schoolAssoc.setId(1L);
+							optional = Optional.of(schoolAssoc);
+						} else {
+							optional = Optional.empty();
+						}
+
+						return optional;
+					}
+				});
+
+		String message = studentService.uploadStudentData(multiPartFile, "magesh");
+		assertTrue(message.equalsIgnoreCase("Bulk Uplaod Successful!"));
+	}
+	
 	private SchoolVO getSchool_WithoutClass() {
 		SchoolVO schoolVO = new SchoolVO();
 		schoolVO.setId(1L);

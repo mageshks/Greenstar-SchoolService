@@ -30,6 +30,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ import com.cognizant.outreach.microservices.school.dao.StudentRepository;
 import com.cognizant.outreach.microservices.school.dao.StudentSchoolAssocRepository;
 import com.cognizant.outreach.microservices.school.helper.ExcelHelper;
 import com.cognizant.outreach.microservices.school.helper.SchoolHelper;
+import com.cognizant.outreach.microservices.school.helper.StudentHelper;
 import com.cognizant.outreach.microservices.school.vo.ClassVO;
 import com.cognizant.outreach.microservices.school.vo.SchoolVO;
 import com.cognizant.outreach.microservices.school.vo.StudentSearchVO;
@@ -75,24 +78,11 @@ public class StudentServiceImpl implements StudentService {
 	@Autowired
 	SchoolService schoolService;
 
-	private static final String CLASS_COUNT_MISMATCH = "It seems the template meta data is modified. Either class or instruction sheet is removed while loading.";
-	private static final String CLASS_NAME_NOT_EXIST = "It seems the template meta data is modified. There is no class exist in database with name :: ";
-	private static final String SHEET_HEADER_METADATA_MODIFIED = "It seems the template meta data is modified. The header is modified in the sheet :: ";
-	private static final String STUDENT_ID_MODIFIED = "Student id in hidden feild is modified as it is not valid student id in database in sheet :: ";
-	private static final String AT_ROW_NUM = "at row number :: ";
-	private static final String STUDENT_NAME_EMPTY = "Student name is empty in sheet :: ";
-	private static final String TEAM_NAME_EMPTY = "Team name is empty in sheet :: ";
-	private static final String BLANK = "";
-	private static final String BULK_UPLOAD_SUCCESS = "Bulk Uplaod Successful!";
-	private static final String TEAM_NAME = "Team Name :: ";
-	private static final String TEAM_AREADY_CHOOSED = " already choosen for class :: ";
-	private static final String TEAM_HAS_5_STUDENTS = " have more than 5 students which is the maximum :: ";
-	private static final String TEAM_COUNT_NOT_VALID = "Number of students on a team should be minimum 3 and maximum 5, please check class :: ";
-	private static final String WITH_TEAM_NAME = " with team name :: ";
-	private static final String HAS_COUNT = " has count :: ";
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(StudentService.class);
+	
 	@Override
 	public List<TeamNameCountVO> getSchoolTeamList(long schoolId) {
+		LOGGER.debug("To retrieve school list for schoolId {}",schoolId);
 		Optional<List<Object[]>> teamList = studentSchoolAssocRepository.listTeamName(schoolId);
 		List<TeamNameCountVO> teamNameCountVOs = new ArrayList<>();
 		if (teamList.isPresent()) {
@@ -115,6 +105,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	private void deleteStudents(List<StudentVO> studentVOs, long classId) {
+		LOGGER.debug("Delete students for classId {}",classId);
 		Optional<List<StudentSchoolAssoc>> associations = studentSchoolAssocRepository
 				.findClassDetailByClassId(classId);
 		if (associations.isPresent()) {
@@ -234,17 +225,12 @@ public class StudentServiceImpl implements StudentService {
 	@Transactional
 	@Override
 	public String uploadStudentData(MultipartFile file, String userId) throws ParseException, IOException {
+		LOGGER.debug("Bulk Upload requested by {}",userId);
 		Workbook workbook = new XSSFWorkbook(file.getInputStream());
+		List<ClassVO> excelClasses = new ArrayList<>();
 		if (file != null) {
 			long schoolId = getSchoolIFromExcelName(file.getOriginalFilename());
 			SchoolVO schoolVO = schoolService.getSchoolDetail(schoolId);
-
-			List<TeamNameCountVO> teamNameCountVOs = getSchoolTeamList(schoolId);
-			// For a map container for easy retrieval based on team name
-			Map<String, TeamNameCountVO> teamNameMap = new HashMap<>();
-			for (TeamNameCountVO teamNameCountVO : teamNameCountVOs) {
-				teamNameMap.put(teamNameCountVO.getTeamName(), teamNameCountVO);
-			}
 
 			Map<String, ClassVO> classMap = new HashMap<>();
 			for (ClassVO classVO : schoolVO.getClassList()) {
@@ -257,7 +243,7 @@ public class StudentServiceImpl implements StudentService {
 			if (!StringUtils.isEmpty(classCountError)) {
 				return classCountError;
 			}
-			List<ClassVO> excelClasses = new ArrayList<>();
+
 			// Iterate through each sheet, create class and persist
 			for (int i = 1; i < workbook.getNumberOfSheets(); i++) {
 				Sheet currentSheet = workbook.getSheetAt(i);
@@ -267,98 +253,82 @@ public class StudentServiceImpl implements StudentService {
 				}
 				ClassVO classVO = classMap.get(currentSheet.getSheetName());
 				// Update student and check if the student id as part of meta data is modified
-				String studentRecordError = updateStudentList(currentSheet, classVO);
+				String studentRecordError = createStudentsFromsheet(currentSheet, classVO);
+				if (!StringUtils.isEmpty(studentRecordError)) {
+					return studentRecordError;
+				}
+				
+				excelClasses.add(classVO);
+			}
+
+			// Group students into default group names if any of the student is provided with team name
+			// This case occurs when user opt for auto team name by system
+			boolean isGroupRandomGenerated = StudentHelper.groupByRandomTeam(excelClasses);
+			List<TeamNameCountVO> teamNameCountVOs = new ArrayList<>();
+			// For a map container for easy retrieval based on team name
+			Map<String, TeamNameCountVO> teamNameMap = new HashMap<>();
+			
+			// If not random generated then consider the existing team list for validation
+			if (!isGroupRandomGenerated) {
+				teamNameCountVOs = getSchoolTeamList(schoolId);
+				for (TeamNameCountVO teamNameCountVO : teamNameCountVOs) {
+					teamNameMap.put(teamNameCountVO.getTeamName(), teamNameCountVO);
+				}
+			}
+		
+			for (ClassVO classVO2 : excelClasses) {
+				// Check if any of the team name on student is empty
+				String studentRecordError = checkTeamNameEmpty(classVO2);
 				if (!StringUtils.isEmpty(studentRecordError)) {
 					return studentRecordError;
 				}
 				// Check if the team has been assigned with size 3,4 or 5 number of students and
 				// it is not duplicate team name
-				String teamNameError = validateTeamCountAndUniquness(classVO, schoolId, teamNameMap);
+				String teamNameError = StudentHelper.validateTeamCountAndUniquness(classVO2, schoolId, teamNameMap);
 				if (!StringUtils.isEmpty(teamNameError)) {
 					return teamNameError;
 				}
-
-				excelClasses.add(classVO);
 			}
-
+			
 			// Check if all the class has minimum 3 and maximum 5 members in each team
 			for (Map.Entry<String, TeamNameCountVO> entry : teamNameMap.entrySet()) {
 				TeamNameCountVO teamNameCountVO = entry.getValue();
 				if (teamNameCountVO.getStudentCount() > 5 || teamNameCountVO.getStudentCount() < 3) {
-					return TEAM_COUNT_NOT_VALID.concat(teamNameCountVO.getClassSectionName()).concat(WITH_TEAM_NAME)
-							.concat(teamNameCountVO.getTeamName()).concat(HAS_COUNT)
-							.concat(teamNameCountVO.getStudentCount() + BLANK);
+					return StudentHelper.TEAM_COUNT_NOT_VALID.concat(teamNameCountVO.getClassSectionName())
+							.concat(StudentHelper.WITH_TEAM_NAME)
+							.concat(teamNameCountVO.getTeamName()).concat(StudentHelper.HAS_COUNT)
+							.concat(teamNameCountVO.getStudentCount() + StudentHelper.BLANK);
 				}
 			}
-
+			
 			// Finally save or update all the students to the DB
 			for (ClassVO classVO2 : excelClasses) {
 				classVO2.setUserId(userId);
 				this.saveOrUpdateStudents(classVO2);
 			}
 		}
-		return BULK_UPLOAD_SUCCESS;
+		return StudentHelper.BULK_UPLOAD_SUCCESS;
 	}
-
-	private String validateTeamCountAndUniquness(ClassVO classVO, long schoolId,
-			Map<String, TeamNameCountVO> teamNameMapForSchool) {
-		// Holds only the class level team information, after final validation this will
-		// merged with school map
-		Map<String, TeamNameCountVO> teamNameMapForClass = new HashMap<>();
-
-		if (!CollectionUtils.isEmpty(classVO.getStudentList())) {
-			for (StudentVO studentVO : classVO.getStudentList()) {
-				TeamNameCountVO teamNameCountVOSchoolLevel = teamNameMapForSchool.get(studentVO.getTeamName());
-				// If the team already choosen by other class return with error message
-				if (null != teamNameCountVOSchoolLevel
-						&& !teamNameCountVOSchoolLevel.getClassSectionName().equals(classVO.getClassAndSectionName())) {
-					return TEAM_NAME.concat(studentVO.getTeamName()).concat(TEAM_AREADY_CHOOSED)
-							.concat(teamNameCountVOSchoolLevel.getClassSectionName());
-				}
-				TeamNameCountVO teamNameCountVOClassLevel = teamNameMapForClass.get(studentVO.getTeamName());
-
-				if (null != teamNameCountVOClassLevel) {
-					// If team name already present within the class check if the count maximum
-					// count is already 5
-					if (teamNameCountVOClassLevel.getStudentCount() == 5) {
-						return TEAM_NAME.concat(studentVO.getTeamName()).concat(TEAM_HAS_5_STUDENTS)
-								.concat(teamNameCountVOClassLevel.getClassSectionName());
-					} else {
-						// If not reached 5 then increment the count
-						teamNameCountVOClassLevel.setStudentCount(teamNameCountVOClassLevel.getStudentCount() + 1);
-					}
-				} else {
-					// New team name
-					// If the team name does not exist then add to the map, so that it will
-					// validated for next student
-					TeamNameCountVO newTeamNameCountVO = new TeamNameCountVO();
-					newTeamNameCountVO.setClassId(classVO.getId());
-					newTeamNameCountVO.setTeamName(studentVO.getTeamName());
-					newTeamNameCountVO.setClassSectionName(classVO.getClassAndSectionName());
-					newTeamNameCountVO.setStudentCount(1);
-					teamNameMapForClass.put(studentVO.getTeamName(), newTeamNameCountVO);
-				}
-			}
-
-			// Update the school map with the class level details
-			for (Map.Entry<String, TeamNameCountVO> entry : teamNameMapForClass.entrySet()) {
-				teamNameMapForSchool.put(entry.getKey(), entry.getValue());
-			}
-		}
-		return null;
-	}
-
-	private String validateSheetHeader(Sheet currentSheet) {
+	
+  	private String validateSheetHeader(Sheet currentSheet) {
 		Row row = currentSheet.getRow(0);
 		if (!((row.getCell(0).getStringCellValue().equals(ExcelHelper.HEADER_ID))
 				&& (row.getCell(1).getStringCellValue().equals(ExcelHelper.HEADER_STUDENT_NAME))
 				&& (row.getCell(2).getStringCellValue().equals(ExcelHelper.HEADER_TEAM_NAME)))) {
-			return SHEET_HEADER_METADATA_MODIFIED + currentSheet.getSheetName();
+			return StudentHelper.SHEET_HEADER_METADATA_MODIFIED + currentSheet.getSheetName();
 		}
 		return null;
 	}
 
-	private String updateStudentList(Sheet currentSheet, ClassVO classVO) {
+	/**
+	 * Iterate through the sheet and add the student information retrieved from
+	 * excel to classVO
+	 * 
+	 * @param currentSheet
+	 * @param classVO
+	 * @return error message if any
+	 */
+	private String createStudentsFromsheet(Sheet currentSheet, ClassVO classVO) {
 		List<StudentVO> students = new ArrayList<>();
 		Iterator<Row> iterator = currentSheet.iterator();
 		// Skip the header row
@@ -367,38 +337,48 @@ public class StudentServiceImpl implements StudentService {
 		while (iterator.hasNext()) {
 			Row currentRow = iterator.next();
 			StudentVO studentVO = new StudentVO();
-			Cell cell = currentRow.getCell(0);
+			Cell idCell = currentRow.getCell(0);
+			Cell nameCell = currentRow.getCell(1);
+			Cell teamNameCell = currentRow.getCell(2);
+			
+			// when all the cells are empty then break the loop, considering sheet ends
+			if ((null == idCell || idCell.getCellType() == Cell.CELL_TYPE_BLANK)
+					&& (null == nameCell || nameCell.getCellType() == Cell.CELL_TYPE_BLANK)
+					&& (null == teamNameCell || teamNameCell.getCellType() == Cell.CELL_TYPE_BLANK)) {
+				break;
+			}
+			
 			// If cell is null it means student id not present then it is a new record
-			if (null != cell && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-				long studentId = (long) cell.getNumericCellValue();
+			if (null != idCell && idCell.getCellType() != Cell.CELL_TYPE_BLANK) {
+				long studentId = (long) idCell.getNumericCellValue();
 				studentVO.setId(studentId);
 				Optional<StudentSchoolAssoc> schoolAssoc = studentSchoolAssocRepository
 						.findByClazzIdAndStudentId(classVO.getId(), studentId);
 				// If the student id is available in sheet but not in DB then throw the error
 				// message
 				if (!schoolAssoc.isPresent()) {
-					return STUDENT_ID_MODIFIED.concat(currentSheet.getSheetName()).concat(AT_ROW_NUM)
-							.concat(currentRow.getRowNum() + BLANK);
+					return StudentHelper.STUDENT_ID_MODIFIED.concat(currentSheet.getSheetName())
+							.concat(StudentHelper.AT_ROW_NUM).concat(currentRow.getRowNum() + StudentHelper.BLANK);
 				} else {
 					studentVO.setAssociationId(schoolAssoc.get().getId());
 				}
 			}
 
 			// Validate and set the student name
-			cell = currentRow.getCell(1);
-			if (null == cell || cell.getCellType() == Cell.CELL_TYPE_BLANK) {
-				return STUDENT_NAME_EMPTY.concat(currentSheet.getSheetName()).concat(AT_ROW_NUM)
-						.concat(currentRow.getRowNum() + BLANK);
+			
+			
+			if (null == nameCell || nameCell.getCellType() == Cell.CELL_TYPE_BLANK) {
+				return StudentHelper.STUDENT_NAME_EMPTY.concat(currentSheet.getSheetName()).concat(StudentHelper.AT_ROW_NUM)
+						.concat(currentRow.getRowNum() + StudentHelper.BLANK);
 			} else {
-				studentVO.setStudentName(cell.getStringCellValue());
+				studentVO.setStudentName(nameCell.getStringCellValue());
 			}
+
 			// Validate and set Team Name
-			cell = currentRow.getCell(2);
-			if (null == cell || cell.getCellType() == Cell.CELL_TYPE_BLANK) {
-				return TEAM_NAME_EMPTY.concat(currentSheet.getSheetName()).concat(AT_ROW_NUM)
-						.concat(currentRow.getRowNum() + BLANK);
+			if (null == teamNameCell || teamNameCell.getCellType() == Cell.CELL_TYPE_BLANK) {
+				studentVO.setTeamName(null);
 			} else {
-				studentVO.setTeamName(cell.getStringCellValue());
+				studentVO.setTeamName(teamNameCell.getStringCellValue());
 			}
 			students.add(studentVO);
 		}
@@ -406,16 +386,28 @@ public class StudentServiceImpl implements StudentService {
 		return null;
 	}
 
+	private String checkTeamNameEmpty(ClassVO classVO) {
+		Iterator<StudentVO> iterator = classVO.getStudentList().iterator();
+		// Iterate through each student row
+		while (iterator.hasNext()) {
+			StudentVO studentVO = iterator.next();
+			if (StringUtils.isEmpty(studentVO.getTeamName())) {
+				return StudentHelper.TEAM_NAME_EMPTY.concat(classVO.getClassAndSectionName());
+			}
+		}
+		return null;
+	}
+
 	private String validateClassVsSheetCount(Workbook workbook, Map<String, ClassVO> classMap) {
 		if (workbook.getNumberOfSheets() - 1 != classMap.size()) {
-			return CLASS_COUNT_MISMATCH;
+			return StudentHelper.CLASS_COUNT_MISMATCH;
 		}
 		// Skip the instruction sheet
 		for (int i = 1; i < workbook.getNumberOfSheets(); i++) {
 			// Check if the sheet name is an existing class name else return with error
 			// message string
 			if (null == classMap.get(workbook.getSheetAt(i).getSheetName())) {
-				return CLASS_NAME_NOT_EXIST + workbook.getSheetAt(i).getSheetName();
+				return StudentHelper.CLASS_NAME_NOT_EXIST + workbook.getSheetAt(i).getSheetName();
 			}
 		}
 		return null;

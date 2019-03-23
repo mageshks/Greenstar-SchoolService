@@ -54,8 +54,9 @@ public class ExcelHelper {
 	public static final String INSTRUCTION_LINE_7 = "7. Refer tab name for corresponding class";
 	public static final String INSTRUCTION_LINE_8 = "8. A team can contain 3 to 5 students";
 	public static final String INSTRUCTION_LINE_9 = "9. Team name should be unique across the school";
+	public static final String INSTRUCTION_LINE_10 = "10. If all the team name in all the class are left blank, system will group students with default team names";
 
-	public static final String INSTRUCTION_LINE_10 = "List of team names already taken";
+	public static final String INSTRUCTION_LINE_11 = "List of team names already taken";
 	public static final String STUDENT_COUNT = "Count";
 	public static final String TEAM_NAME_HEADER = "Team";
 	public static final String CLASS_NAME_HEADER = "Class";
@@ -152,10 +153,11 @@ public class ExcelHelper {
 		createIntroductionCells(workbook, sheet, 11, 2, 7, INSTRUCTION_LINE_7);
 		createIntroductionCells(workbook, sheet, 12, 2, 6, INSTRUCTION_LINE_8);
 		createIntroductionCells(workbook, sheet, 13, 2, 7, INSTRUCTION_LINE_9);
+		createIntroductionCells(workbook, sheet, 14, 2, 12, INSTRUCTION_LINE_10);
 		// If team list already available then add the list to instruction sheet else
 		// leave it empty
 		if (!CollectionUtils.isEmpty(teamNameList)) {
-			createIntroductionCells(workbook, sheet, 15, 2, 11, INSTRUCTION_LINE_10);
+			createIntroductionCells(workbook, sheet, 16, 2, 11, INSTRUCTION_LINE_11);
 			Row rowTeam = sheet.createRow(16);
 			createCell(workbook, sheet, rowTeam, 2, TEAM_NAME_HEADER);
 			createCell(workbook, sheet, rowTeam, 3, STUDENT_COUNT);
