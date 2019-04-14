@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -243,7 +244,12 @@ public class StudentServiceImpl implements StudentService {
 			if (!StringUtils.isEmpty(classCountError)) {
 				return classCountError;
 			}
-
+			
+			List<String> excelTeamNames = null;
+			if(null != workbook.getSheetAt(0)) {
+				excelTeamNames = getTeamNameFromExcel(workbook.getSheetAt(0));
+			}
+			
 			// Iterate through each sheet, create class and persist
 			for (int i = 1; i < workbook.getNumberOfSheets(); i++) {
 				Sheet currentSheet = workbook.getSheetAt(i);
@@ -260,10 +266,30 @@ public class StudentServiceImpl implements StudentService {
 				
 				excelClasses.add(classVO);
 			}
-
+			
+			
+			// Custom team name and student count validation
+			if((null != excelClasses && excelClasses.size() > 0) && 
+					(null != excelTeamNames && excelTeamNames.size() > 0)) {
+				int totalStudents = 0;
+				for(ClassVO classVO : excelClasses) {
+					totalStudents += classVO.getStudentList().size() > 0 ? classVO.getStudentList().size() : 0;
+				}
+				
+				int studSet = totalStudents / 5;				
+				int remStud = totalStudents - (studSet * 5);
+				
+				studSet = remStud > 0 ? (studSet + 1) : studSet;
+				
+				if(excelTeamNames.size() < studSet) {
+					return "Please correct the team name list and student list and try again";
+				}
+			}
+			
+			
 			// Group students into default group names if any of the student is provided with team name
 			// This case occurs when user opt for auto team name by system
-			boolean isGroupRandomGenerated = StudentHelper.groupByRandomTeam(excelClasses);
+			boolean isGroupRandomGenerated = StudentHelper.groupByRandomTeam(excelClasses, excelTeamNames);
 			List<TeamNameCountVO> teamNameCountVOs = new ArrayList<>();
 			// For a map container for easy retrieval based on team name
 			Map<String, TeamNameCountVO> teamNameMap = new HashMap<>();
@@ -418,4 +444,19 @@ public class StudentServiceImpl implements StudentService {
 				excelName.indexOf("_", excelName.indexOf("Bulk_Upload_Student_") + 21));
 		return Long.parseLong(schoolId);
 	}
+	
+	private List<String> getTeamNameFromExcel(Sheet instractionheet) {
+		
+		Row currentRow = instractionheet.getRow(19);
+		List<String> teamNameList = new ArrayList<>();
+		if(null != instractionheet) {
+			Cell teamNameCell = currentRow.getCell(5);			
+			if(null != teamNameCell && null != teamNameCell.getStringCellValue()) {
+				String teamNames = teamNameCell.getStringCellValue();
+				teamNameList = new ArrayList<String>(Arrays.asList(teamNames.split("\\,")));
+			}			
+		}
+		return teamNameList;		
+	}
+	
 }

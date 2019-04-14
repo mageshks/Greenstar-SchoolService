@@ -55,6 +55,7 @@ public class ExcelHelper {
 	public static final String INSTRUCTION_LINE_8 = "8. A team can contain 3 to 5 students";
 	public static final String INSTRUCTION_LINE_9 = "9. Team name should be unique across the school";
 	public static final String INSTRUCTION_LINE_10 = "10. If all the team name in all the class are left blank, system will group students with default team names";
+	public static final String INSTRUCTION_LINE_12 = "11. If you want to override the system provided team names enter the comma separated names in F20 cell";
 
 	public static final String INSTRUCTION_LINE_11 = "List of team names already taken";
 	public static final String STUDENT_COUNT = "Count";
@@ -154,15 +155,16 @@ public class ExcelHelper {
 		createIntroductionCells(workbook, sheet, 12, 2, 6, INSTRUCTION_LINE_8);
 		createIntroductionCells(workbook, sheet, 13, 2, 7, INSTRUCTION_LINE_9);
 		createIntroductionCells(workbook, sheet, 14, 2, 12, INSTRUCTION_LINE_10);
+		createIntroductionCells(workbook, sheet, 15, 2, 12, INSTRUCTION_LINE_12);
 		// If team list already available then add the list to instruction sheet else
 		// leave it empty
 		if (!CollectionUtils.isEmpty(teamNameList)) {
-			createIntroductionCells(workbook, sheet, 16, 2, 11, INSTRUCTION_LINE_11);
-			Row rowTeam = sheet.createRow(16);
+			createIntroductionCells(workbook, sheet, 17, 2, 11, INSTRUCTION_LINE_11);
+			Row rowTeam = sheet.createRow(18);
 			createCell(workbook, sheet, rowTeam, 2, TEAM_NAME_HEADER);
 			createCell(workbook, sheet, rowTeam, 3, STUDENT_COUNT);
 			createCell(workbook, sheet, rowTeam, 4, CLASS_NAME_HEADER);
-			int rowIndex = 17;
+			int rowIndex = 19;
 			for (TeamNameCountVO teamNameCountVO : teamNameList) {
 				Row rowTeamCount = sheet.createRow(rowIndex);
 				createCellForString(workbook, sheet, rowTeamCount, 2, teamNameCountVO.getTeamName());

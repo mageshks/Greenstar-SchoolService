@@ -59,11 +59,11 @@ public class StudentHelper {
 	 * @param excelClasses
 	 * @return isGroupRandomGenerated true if random generated
 	 */
-	public static boolean groupByRandomTeam(List<ClassVO> excelClasses) {
+	public static boolean groupByRandomTeam(List<ClassVO> excelClasses, List<String> excelTeamNames) {
 		boolean isGroupRandomGenerated = false;
 		// Check if school is valid for random team generation
 		if (checkSchoolForRandomGrouping(excelClasses)) {
-			List<String> teamNames = initTeamName();
+			List<String> teamNames = excelTeamNames.size()> 0 ? excelTeamNames : initTeamName();
 			
 			// Iterate through each map and form as map with key as team name and value as list of students
 			for (ClassVO classVO : excelClasses) {
