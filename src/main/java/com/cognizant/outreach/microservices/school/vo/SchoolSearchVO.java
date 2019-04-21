@@ -27,6 +27,16 @@ public class SchoolSearchVO {
 	
 	private String district;
 
+	private String allowedSchools;
+	
+	public String getAllowedSchools() {
+		return allowedSchools;
+	}
+
+	public void setAllowedSchools(String allowedSchools) {
+		this.allowedSchools = allowedSchools;
+	}
+
 	public String getStateName() {
 		return stateName;
 	}

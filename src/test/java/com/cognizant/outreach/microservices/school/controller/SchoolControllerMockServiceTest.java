@@ -53,7 +53,7 @@ public class SchoolControllerMockServiceTest {
 	@Test
 	public void TestGetSchools() {
 		when(schoolService.getSchools()).thenReturn(getSchools());
-		assertEquals(schoolController.getSchools().getStatusCode(),HttpStatus.OK);
+		assertEquals(schoolController.getSchools("315").getStatusCode(),HttpStatus.OK);
 	}
 
 	private Optional<List<SchoolVO>> getSchools() {

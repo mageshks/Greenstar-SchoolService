@@ -16,7 +16,10 @@ package com.cognizant.outreach.microservices.school.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,9 +65,11 @@ public class SchoolController {
 	 * 
 	 * @return List of schools if present else null
 	 */
-	@RequestMapping(method = RequestMethod.GET, path = "/getSchools")
-	public ResponseEntity<List<SchoolVO>> getSchools() {
+	@RequestMapping(method = RequestMethod.POST, path = "/getSchools")
+	public ResponseEntity<List<SchoolVO>> getSchools(@RequestBody String schoolIds) {
 		List<SchoolVO> schools = schoolService.getSchools().get();
+		//Below condition for Event POC to restrict the school
+		schools = getSelectedSchools(schoolIds,schools);
 		logger.debug("Retrieved school count ==> ", null == schools ? null : schools.size());
 		return ResponseEntity.status(HttpStatus.OK).body(schools);
 	}
@@ -116,10 +122,30 @@ public class SchoolController {
 	@RequestMapping(method = RequestMethod.POST, path = "/getSchoolsForSearch")
 	public ResponseEntity<List<SchoolVO>> getSchoolList(@RequestBody SchoolSearchVO schoolSearchVO) {
 		List<SchoolVO> schools = schoolService.getSchoolsForSearch(schoolSearchVO);
+		//Below condition for Event POC to restrict the school
+		schools = getSelectedSchools(schoolSearchVO.getAllowedSchools(),schools);
 		logger.debug("Retreived school count {}", schools.size());
 		return ResponseEntity.status(HttpStatus.OK).body(schools);
 	}
 
+	private List<SchoolVO> getSelectedSchools(String schoolIds, List<SchoolVO> schools) {
+		List<SchoolVO> allowedSchools = new ArrayList<>();
+		if (!StringUtils.isEmpty(schoolIds) && !CollectionUtils.isEmpty(schools)) {
+
+			String[] schoolsAllowed = schoolIds.split(",");
+			Map<String, String> shoolsMap = new HashMap<>();
+			for (String schoolId : schoolsAllowed) {
+				shoolsMap.put(schoolId, schoolId);
+			}
+			for (SchoolVO schoolVO : schools) {
+				if (shoolsMap.get(schoolVO.getId() + "") != null) {
+					allowedSchools.add(schoolVO);
+				}
+			}
+		}
+		return allowedSchools;
+	}
+	
 	/**
 	 * To save the school
 	 * 
