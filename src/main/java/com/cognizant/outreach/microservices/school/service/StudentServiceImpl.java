@@ -449,7 +449,7 @@ public class StudentServiceImpl implements StudentService {
 		
 		Row currentRow = instractionheet.getRow(19);
 		List<String> teamNameList = new ArrayList<>();
-		if(null != instractionheet) {
+		if(null != instractionheet && currentRow != null) {
 			Cell teamNameCell = currentRow.getCell(5);			
 			if(null != teamNameCell && null != teamNameCell.getStringCellValue()) {
 				String teamNames = teamNameCell.getStringCellValue();
