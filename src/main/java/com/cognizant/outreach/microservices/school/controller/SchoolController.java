@@ -130,6 +130,7 @@ public class SchoolController {
 
 	private List<SchoolVO> getSelectedSchools(String schoolIds, List<SchoolVO> schools) {
 		List<SchoolVO> allowedSchools = new ArrayList<>();
+		schoolIds = null == schoolIds? "":schoolIds.trim();
 		if (!StringUtils.isEmpty(schoolIds) && !CollectionUtils.isEmpty(schools)) {
 
 			String[] schoolsAllowed = schoolIds.split(",");
@@ -142,6 +143,9 @@ public class SchoolController {
 					allowedSchools.add(schoolVO);
 				}
 			}
+		}else {
+			//If the filtering schoolIds empty then return the school list without filtering
+			allowedSchools = schools;
 		}
 		return allowedSchools;
 	}
