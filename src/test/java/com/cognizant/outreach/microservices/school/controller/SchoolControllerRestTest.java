@@ -17,6 +17,7 @@ package com.cognizant.outreach.microservices.school.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class SchoolControllerRestTest {
 	@Test
 	@SuppressWarnings({"rawtypes"})
 	public void testGetSchools() throws Exception {
-		ResponseEntity<List> response = template.getForEntity("/getSchools", List.class);
+		ResponseEntity<List> response = template.postForEntity("/getSchools", "1,2,3", List.class);
 		Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 	
@@ -79,12 +80,16 @@ public class SchoolControllerRestTest {
 	@Test
 	@SuppressWarnings({"rawtypes","unchecked"})
 	public void testGetClassDetail() throws Exception {
-		ResponseEntity<List> schoolResponse = template.getForEntity("/getSchools", List.class);
-		List<Map<Object, Object>> schoolsMap = schoolResponse.getBody();
-		Map<Object, Object> schoolMap = (Map<Object, Object>) schoolsMap.get(0);
-		SchoolVO schoolVO = new SchoolVO();
-		schoolVO.setId((Integer)schoolMap.get("id"));
-		ResponseEntity<List> response = template.postForEntity("/getClassList",schoolVO, List.class);
-		Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+		ResponseEntity<List> schoolResponse = template.postForEntity("/getSchools", "1,2", List.class);
+		List<Map<Object, Object>> schoolsMap = schoolResponse.getBody();		
+		Assert.assertEquals(HttpStatus.OK, schoolResponse.getStatusCode());
+		
+		if(!CollectionUtils.isEmpty(schoolsMap)) {
+			Map<Object, Object> schoolMap = (Map<Object, Object>) schoolsMap.get(0);
+			SchoolVO schoolVO = new SchoolVO();
+			schoolVO.setId((Integer)schoolMap.get("id"));
+			ResponseEntity<List> response = template.postForEntity("/getClassList",schoolVO, List.class);
+			Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+		}
 	}
 }

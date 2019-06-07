@@ -67,7 +67,7 @@ public class SchoolControllerTest {
 	 */
 	@Test
 	public void testGetSchools() throws Exception {
-		ResponseEntity<List> response1 = template.getForEntity("/getSchools", List.class);
+		ResponseEntity<List> response1 = template.postForEntity("/getSchools", "1,2,3", List.class);
 		Assert.assertEquals(HttpStatus.OK, response1.getStatusCode());
 	}
 	
